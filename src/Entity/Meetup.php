@@ -28,7 +28,7 @@ class Meetup
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private ?\DateTimeImmutable $registrationDeadline = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ['unsigned' => true])]
     private ?int $maximumParticipants = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
