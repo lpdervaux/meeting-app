@@ -22,14 +22,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 100, unique: true)]
-    private ?string $nickname = null;
-
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\Column(length: 100, unique: true)]
+    private ?string $nickname = null;
 
     #[ORM\ManyToMany(targetEntity: Role::class)]
     private Collection $roles;
