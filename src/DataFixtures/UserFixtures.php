@@ -13,28 +13,23 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserFixtures extends Fixture implements DependentFixtureInterface
+class UserFixtures
+    extends FakerFixtures
+    implements DependentFixtureInterface
 {
-    public const DEFAULT_USER = 'user_default';
-    public const DEFAULT_ADMINISTRATOR = 'administrator_default';
-    public const USER_COUNT = 3000;
-    public const USER_PREFIX = 'user_';
-    public const ADMINISTRATOR_COUNT = 30;
-    public const ADMINISTRATOR_PREFIX = 'administrator_';
+    public const DEFAULT_USER = __CLASS__ . 'default-user';
+    public const DEFAULT_ADMINISTRATOR = __CLASS__ . 'default-administrator';
 
-    private const DOMAIN = 'campus-eni.fr';
-
-    // initialized on load()
-    private readonly array $campuses;
-    private readonly ObjectManager $manager;
-
-    // used to keep track of nickname collisions
-    private array $nicknameOffset = [];
+    public const COUNT = 1000;
+    public const ADMINISTRATOR_COUNT = 10;
+    public const ADMINISTRATOR_PREFIX = __CLASS__ . 'administrator';
 
     public function __construct (
-        private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly FakerService $fakerService
-    ) {}
+        FakerService $fakerService,
+        private readonly UserPasswordHasherInterface $userPasswordHasher
+    ) {
+        parent::__construct($fakerService);
+    }
 
     public function getDependencies () : array
     {
@@ -46,134 +41,75 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public function load (ObjectManager $manager) : void
     {
-        $this->initialize($manager);
+        parent::load($manager);
 
-        $userRole = $this->getReference(RoleFixtures::USER);
         $administratorRole = $this->getReference(RoleFixtures::ADMINISTRATOR);
 
-        $this->createDefault(
-            'User',
-            $userRole,
-            $this->getReference(CampusFixtures::ONLINE),
-            self::DEFAULT_USER
-        );
+        $defaultUser = $this->generate(nickname: 'user');
+        $manager->persist($defaultUser);
+        $this->addReference(self::DEFAULT_USER, $defaultUser);
 
-        $this->createDefault(
-            'Administrator',
-            $administratorRole,
-            $this->getReference(CampusFixtures::ONLINE),
-            self::DEFAULT_ADMINISTRATOR
-        );
+        $defaultAdministrator = $this->generate(nickname: 'administrator', roles: [ $administratorRole ]);
+        $manager->persist($defaultAdministrator);
+        $this->addReference(self::DEFAULT_ADMINISTRATOR, $defaultAdministrator);
 
-        $this->createFakes(
-            $userRole,
-            self::USER_COUNT,
-            self::USER_PREFIX
-        );
-
-        $this->createFakes(
-            $administratorRole,
+        $this->fakeMany(self::COUNT);
+        $this->fakeMany(
             self::ADMINISTRATOR_COUNT,
-            self::ADMINISTRATOR_PREFIX
+            self::ADMINISTRATOR_PREFIX,
+            fn () => $this->generate(roles: [ $administratorRole ])
         );
 
         $manager->flush();
     }
 
-    private function initialize (ObjectManager $manager) : void
+    protected function generate (
+        string $name = null,
+        string $surname = null,
+        string $nickname = null,
+        array $roles = null
+    ) : User
     {
-        $this->manager = $manager;
-        $this->campuses = [
-            $this->getReference(CampusFixtures::SAINT_HERBLAIN),
-            $this->getReference(CampusFixtures::CHARTRES_DE_BRETAGNE),
-            $this->getReference(CampusFixtures::LA_ROCHE_SUR_YON),
-            $this->getReference(CampusFixtures::ONLINE)
-        ];
-    }
-
-    private function createDefault (
-        string $name,
-        Role $role,
-        Campus $campus,
-        string $reference
-    ) : void
-    {
-        $user = $this->generateDefault($name, $role, $campus);
-        $this->manager->persist($user);
-        $this->addReference($reference, $user);
-    }
-
-    private function generateDefault (string $name, Role $role, Campus $campus) : User
-    {
-        $lowerName = mb_strtolower($name);
+        $name = ( $name ) ?: $this->generator->firstName();
+        $surname = ( $surname ) ?: $this->generator->lastName();
+        $nickname = ( $nickname ) ?: $this->generateUniqueNickname($name, $surname);
 
         $user = new User();
         $user
-            ->setEmail($lowerName . '@' . self::DOMAIN)
-            ->setNickname($name)
-            ->setPassword(
-                $this->userPasswordHasher->hashPassword($user, $lowerName)
-            )
-            ->setName($name . '-name')
-            ->setSurname($name . '-surname')
-            ->setPhoneNumber('0102030405')
-            ->setCampus($campus)
-            ->addRole($role);
+            ->setEmail($nickname . '@' . $this->generator->safeEmailDomain())
+            ->setNickname($nickname)
+            ->setPassword($this->userPasswordHasher->hashPassword($user, $nickname))
+            ->setName($name)
+            ->setSurname($surname)
+            ->setPhoneNumber($this->generator->phoneNumber())
+            ->setCampus($this->getReference(CampusFixtures::class . mt_rand(0, CampusFixtures::COUNT - 1)));
+
+        if ( $roles )
+            foreach ( $roles as $role ) $user->addRole($role);
+        else
+            $user->addRole($this->getReference(RoleFixtures::USER));
 
         return $user;
     }
 
-    // generates a unique nickname
-    private function generateNickname (string $name, string $surname) : string
-    {
-        $id = mb_strtolower($name) . '.' . mb_strtolower($surname);
-        $offset = $this->nicknameOffset[$id] ?? null;
+    private array $nicknameOffset = [];
 
-        if ( $offset === null ) {
-            $nickname = $id;
-            $this->nicknameOffset[$id] = 2;
-        } else {
-            $nickname = $id . '.' . $offset;
-            $this->nicknameOffset[$id] = $offset + 1;
+    private function generateUniqueNickname (string $name, string $surname) : string
+    {
+        $identifier = mb_strtolower($name) . '.' . mb_strtolower($surname);
+        $offset = $this->nicknameOffset[$identifier] ?? null;
+
+        if ( $offset === null )
+        {
+            $nickname = $identifier;
+            $this->nicknameOffset[$identifier] = 2;
+        }
+        else
+        {
+            $nickname = $identifier . '.' . $offset;
+            $this->nicknameOffset[$identifier] = $offset + 1;
         }
 
         return $nickname;
-    }
-
-    private function generateFake (Role $role) : User
-    {
-        $name = $this->fakerService->getGenerator()->firstName();
-        $surname = $this->fakerService->getGenerator()->lastName();
-        $nickname = $this->generateNickname($name, $surname);
-        $year = date('Y') - rand(1, 3);
-
-        $user = new User();
-        $user
-            ->setEmail($nickname . '.' . $year . '@' . self::DOMAIN)
-            ->setNickname($nickname)
-            ->setPassword(
-                $this->userPasswordHasher->hashPassword($user, $nickname)
-            )
-            ->setName($name)
-            ->setSurname($surname)
-            ->setPhoneNumber($this->fakerService->getGenerator()->phoneNumber())
-            ->setCampus($this->campuses[array_rand($this->campuses)])
-            ->addRole($role);
-
-        return $user;
-    }
-
-    private function createFakes (
-        Role $role,
-        int $count,
-        string $prefix
-    ) : void
-    {
-        for ($i = 0; $i < $count; $i++)
-        {
-            $user = $this->generateFake($role);
-            $this->manager->persist($user);
-            $this->addReference($prefix . $i, $user);
-        }
     }
 }
