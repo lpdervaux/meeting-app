@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\Role;
@@ -8,8 +10,8 @@ use Doctrine\Persistence\ObjectManager;
 
 class RoleFixtures extends Fixture
 {
-    public const USER_REFERENCE = 'user-role';
-    public const ADMINISTRATOR_REFERENCE = 'administrator-role';
+    public const USER = 'role_user';
+    public const ADMINISTRATOR = 'role_administrator';
 
     public function load(ObjectManager $manager): void
     {
@@ -18,17 +20,16 @@ class RoleFixtures extends Fixture
             ->setLabel('User')
             ->setDescription('Regular user role');
         $manager->persist($userRole);
+        $this->addReference(self::USER, $userRole);
 
         $administratorRole = (new Role())
             ->setRole('ROLE_ADMINISTRATOR')
             ->setLabel('Administrator')
             ->setDescription('Administrator role');
         $manager->persist($administratorRole);
+        $this->addReference(self::ADMINISTRATOR, $administratorRole);
 
         $manager->flush();
-
-        $this->addReference(self::USER_REFERENCE, $userRole);
-        $this->addReference(self::ADMINISTRATOR_REFERENCE, $administratorRole);
     }
 }
 
