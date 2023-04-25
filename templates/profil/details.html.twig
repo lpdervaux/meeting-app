@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil Utilisateur{% endblock %}
+
+{% block body %}
+    <h2>{{user.nickname}}</h2>
+
+    <div>
+        <ul>
+            <li>{{user.name}}</li>
+            <li>{{user.surname}}</li>
+            <li>{{user.phoneNumber}}</li>
+            <li>{{user.email}}</li>
+            <li>{{user.campus.name}}</li>
+        </ul>
+        <a href="" >Retour</a>
+    </div>
+{% endblock %}
+
