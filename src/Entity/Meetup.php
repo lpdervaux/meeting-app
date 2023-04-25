@@ -21,23 +21,15 @@ class Meetup
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $start = null;
-
-    #[ORM\Column]
-    private ?\DateInterval $duration = null;
-
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $registrationDeadline = null;
-
-    #[ORM\Column(options: ['unsigned' => true])]
-    private ?int $maximumParticipants = null;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'meetups')]
-    private Collection $users;
+    #[ORM\Column(options: ['unsigned' => true])]
+    private ?int $capacity = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Location $location = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -45,14 +37,35 @@ class Meetup
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Location $location = null;
+    private ?User $coordinator = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    private ?\DateTimeImmutable $start = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    private ?\DateTimeImmutable $end = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    private ?\DateTimeImmutable $registrationStart = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    private ?\DateTimeImmutable $registrationEnd = null;
 
     #[ORM\Column]
     private ?bool $cancelled = null;
 
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $cancellationDate = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $cancellationReason = null;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'meetups')]
+    private Collection $attendees;
+
     public function __construct()
     {
-        $this->users = new ArrayCollection();
+        $this->attendees = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,54 +85,6 @@ class Meetup
         return $this;
     }
 
-    public function getStart(): ?\DateTimeImmutable
-    {
-        return $this->start;
-    }
-
-    public function setStart(\DateTimeImmutable $start): self
-    {
-        $this->start = $start;
-
-        return $this;
-    }
-
-    public function getDuration(): ?\DateInterval
-    {
-        return $this->duration;
-    }
-
-    public function setDuration(\DateInterval $duration): self
-    {
-        $this->duration = $duration;
-
-        return $this;
-    }
-
-    public function getRegistrationDeadline(): ?\DateTimeImmutable
-    {
-        return $this->registrationDeadline;
-    }
-
-    public function setRegistrationDeadline(\DateTimeImmutable $registrationDeadline): self
-    {
-        $this->registrationDeadline = $registrationDeadline;
-
-        return $this;
-    }
-
-    public function getMaximumParticipants(): ?int
-    {
-        return $this->maximumParticipants;
-    }
-
-    public function setMaximumParticipants(int $maximumParticipants): self
-    {
-        $this->maximumParticipants = $maximumParticipants;
-
-        return $this;
-    }
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -132,41 +97,14 @@ class Meetup
         return $this;
     }
 
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
+    public function getCapacity(): ?int
     {
-        return $this->users;
+        return $this->capacity;
     }
 
-    public function addUser(User $user): self
+    public function setCapacity(int $capacity): self
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->addMeetup($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        if ($this->users->removeElement($user)) {
-            $user->removeMeetup($this);
-        }
-
-        return $this;
-    }
-
-    public function getCampus(): ?Campus
-    {
-        return $this->campus;
-    }
-
-    public function setCampus(?Campus $campus): self
-    {
-        $this->campus = $campus;
+        $this->capacity = $capacity;
 
         return $this;
     }
@@ -183,6 +121,78 @@ class Meetup
         return $this;
     }
 
+    public function getCampus(): ?Campus
+    {
+        return $this->campus;
+    }
+
+    public function setCampus(?Campus $campus): self
+    {
+        $this->campus = $campus;
+
+        return $this;
+    }
+
+    public function getCoordinator(): ?User
+    {
+        return $this->coordinator;
+    }
+
+    public function setCoordinator(?User $coordinator): self
+    {
+        $this->coordinator = $coordinator;
+
+        return $this;
+    }
+
+    public function getStart(): ?\DateTimeImmutable
+    {
+        return $this->start;
+    }
+
+    public function setStart(\DateTimeImmutable $start): self
+    {
+        $this->start = $start;
+
+        return $this;
+    }
+
+    public function getEnd(): ?\DateTimeImmutable
+    {
+        return $this->end;
+    }
+
+    public function setEnd(\DateTimeImmutable $end): self
+    {
+        $this->end = $end;
+
+        return $this;
+    }
+
+    public function getRegistrationStart(): ?\DateTimeImmutable
+    {
+        return $this->registrationStart;
+    }
+
+    public function setRegistrationStart(\DateTimeImmutable $registrationStart): self
+    {
+        $this->registrationStart = $registrationStart;
+
+        return $this;
+    }
+
+    public function getRegistrationEnd(): ?\DateTimeImmutable
+    {
+        return $this->registrationEnd;
+    }
+
+    public function setRegistrationEnd(\DateTimeImmutable $registrationEnd): self
+    {
+        $this->registrationEnd = $registrationEnd;
+
+        return $this;
+    }
+
     public function isCancelled(): ?bool
     {
         return $this->cancelled;
@@ -191,6 +201,54 @@ class Meetup
     public function setCancelled(bool $cancelled): self
     {
         $this->cancelled = $cancelled;
+
+        return $this;
+    }
+
+    public function getCancellationDate(): ?\DateTimeImmutable
+    {
+        return $this->cancellationDate;
+    }
+
+    public function setCancellationDate(?\DateTimeImmutable $cancellationDate): self
+    {
+        $this->cancellationDate = $cancellationDate;
+
+        return $this;
+    }
+
+    public function getCancellationReason(): ?string
+    {
+        return $this->cancellationReason;
+    }
+
+    public function setCancellationReason(?string $cancellationReason): self
+    {
+        $this->cancellationReason = $cancellationReason;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getAttendees(): Collection
+    {
+        return $this->attendees;
+    }
+
+    public function addAttendee(User $attendee): self
+    {
+        if (!$this->attendees->contains($attendee)) {
+            $this->attendees->add($attendee);
+        }
+
+        return $this;
+    }
+
+    public function removeAttendee(User $attendee): self
+    {
+        $this->attendees->removeElement($attendee);
 
         return $this;
     }
