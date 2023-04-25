@@ -22,8 +22,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\ManyToMany(targetEntity: Role::class)]
-    private Collection $roles;
+    #[ORM\Column(length: 100, unique: true)]
+    private ?string $nickname = null;
 
     /**
      * @var string The hashed password
@@ -31,8 +31,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(length: 100, unique: true)]
-    private ?string $nickname = null;
+    #[ORM\ManyToMany(targetEntity: Role::class)]
+    private Collection $roles;
 
     #[ORM\Column(length: 100)]
     private ?string $surname = null;
@@ -47,13 +47,43 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: false)]
     private ?Campus $campus = null;
 
-    #[ORM\ManyToMany(targetEntity: Meetup::class, inversedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: Meetup::class, mappedBy: 'attendees')]
     private Collection $meetups;
 
     public function __construct()
     {
         $this->meetups = new ArrayCollection();
         $this->roles = new ArrayCollection();
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        return $this
+            ->roles
+            ->map(fn (Role $role) => $role->getRole())
+            ->toArray();
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 
     public function getId(): ?int
@@ -73,27 +103,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
+    public function getNickname(): ?string
     {
-        return (string) $this->email;
+        return $this->nickname;
     }
 
-    /**
-     * @see UserInterface
-     */
-    public function getRoles(): array
+    public function setNickname(string $nickname): self
     {
-        return array_unique(
-            $this
-                ->roles
-                ->map(fn (Role $role) => $role->getRole())
-                ->toArray()
-        );
+        $this->nickname = $nickname;
+
+        return $this;
     }
 
     /**
@@ -112,22 +131,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @see UserInterface
+     * @return Collection<int, Role>
      */
-    public function eraseCredentials()
+    public function getRolesCollection(): Collection
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        return $this->roles;
     }
 
-    public function getNickname(): ?string
+    public function addRole(Role $role): self
     {
-        return $this->nickname;
+        if (!$this->roles->contains($role)) {
+            $this->roles->add($role);
+        }
+
+        return $this;
     }
 
-    public function setNickname(string $nickname): self
+    public function removeRole(Role $role): self
     {
-        $this->nickname = $nickname;
+        $this->roles->removeElement($role);
 
         return $this;
     }
@@ -192,6 +214,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->meetups->contains($meetup)) {
             $this->meetups->add($meetup);
+            $meetup->addAttendee($this);
         }
 
         return $this;
@@ -199,31 +222,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeMeetup(Meetup $meetup): self
     {
-        $this->meetups->removeElement($meetup);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Role>
-     */
-    public function getRolesCollection(): Collection
-    {
-        return $this->roles;
-    }
-
-    public function addRole(Role $role): self
-    {
-        if (!$this->roles->contains($role)) {
-            $this->roles->add($role);
+        if ($this->meetups->removeElement($meetup)) {
+            $meetup->removeAttendee($this);
         }
-
-        return $this;
-    }
-
-    public function removeRole(Role $role): self
-    {
-        $this->roles->removeElement($role);
 
         return $this;
     }
