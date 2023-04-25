@@ -41,8 +41,8 @@ class LocationFixtures extends Fixture implements DependentFixtureInterface
         $this->manager = $manager;
 
         $cities = [];
-        for ($i = 0; $i < CityFixtures::CITY_COUNT; $i++) {
-            $cities[] = $this->getReference(CityFixtures::CITY_PREFIX . $i);
+        for ($i = 0; $i < CityFixtures::COUNT; $i++) {
+            $cities[] = $this->getReference(CityFixtures::class . $i);
         }
         $this->cities = $cities;
     }

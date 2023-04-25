@@ -5,52 +5,25 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\City;
-use App\Service\FakerService;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class CityFixtures extends Fixture
+class CityFixtures extends FakerFixtures
 {
-    public const CITY_COUNT = 20;
-    public const CITY_PREFIX = 'city_';
-
-    private readonly ObjectManager $manager;
-
-    public function __construct (
-        private readonly FakerService $fakerService
-    ) {}
+    public const COUNT = 20;
 
     public function load(ObjectManager $manager): void
     {
-        $this->initialize($manager);
+        parent::load($manager);
 
-        $this->fakeMany(self::CITY_COUNT);
+        $this->fakeMany(self::COUNT);
 
-        $manager->flush();
+        $this->manager->flush();
     }
 
-    private function initialize (ObjectManager $manager) : void
-    {
-        $this->manager = $manager;
-    }
-
-    private function fakeMany (int $count) : void
-    {
-        for ($i = 0; $i < $count; $i++) {
-            $city = $this->generateFake();
-            $this->manager->persist($city);
-            $this->addReference(self::CITY_PREFIX . $i, $city);
-        }
-    }
-
-    private function generateFake () : City
+    protected function generate () : City
     {
         return (new City())
-            ->setName(
-                $this->fakerService->getGenerator()->unique()->city()
-            )
-            ->setPostalCode(
-                $this->fakerService->getGenerator()->postcode()
-            );
+            ->setName($this->generator->unique()->city())
+            ->setPostalCode($this->generator->postcode());
     }
 }
