@@ -1,0 +1,43 @@
+body
+{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+header
+{
+    background-color: #E6E6E6;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.toolbar
+{
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.toolbar>li
+{
+    margin-right: 30px;
+}
+
+.toolbar>li>a
+{
+    text-decoration: none;
+    color: black;
+}
+
+.toolbar>li>a:hover
+{
+    color: #B0413E;
+    cursor: pointer;
+}
+
+main
+{
+    padding-left: 20px;
+}
