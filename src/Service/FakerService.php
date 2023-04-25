@@ -7,9 +7,9 @@ namespace App\Service;
 use Faker\Factory;
 use Faker\Generator;
 
-class FakerService
+readonly class FakerService
 {
-    private readonly Generator $generator;
+    private Generator $generator;
 
     public function __construct ()
     {
