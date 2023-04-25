@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Profil{% endblock %}
+
+{% block body %}
+
+    <div >
+        <h1>Mon Profil</h1>
+
+        {{ form_start(profilEditForm) }}
+        {{ form_widget(profilEditForm) }}
+        <button type="submit" class="btn">Enregistrer</button>
+        <a href="{{ path('app_home') }}" >Annuler</a>
+        {{ form_end(profilEditForm) }}
+
+    </div>
+
+{% endblock %}
