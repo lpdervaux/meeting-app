@@ -2,16 +2,21 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Campus;
+use App\Entity\Role;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Faker\Generator;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture implements DependentFixtureInterface
 {
     public const USER_REFERENCE = 'user';
     public const ADMINISTRATOR_REFERENCE = 'administrator';
+
+    private const DOMAIN = 'campus-eni.fr';
 
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHasher
@@ -27,45 +32,40 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
+        $user = $this->createDefaultUser(
+            'User',
+            $this->getReference(RoleFixtures::USER_REFERENCE),
+            $this->getReference(CampusFixtures::ONLINE_CAMPUS_REFERENCE)
+        );
+        $manager->persist($user);
+        $this->addReference(self::USER_REFERENCE, $user);
+
+        $administrator = $this->createDefaultUser(
+            'Administrator',
+            $this->getReference(RoleFixtures::USER_REFERENCE),
+            $this->getReference(CampusFixtures::ONLINE_CAMPUS_REFERENCE)
+        );
+        $manager->flush();
+        $this->addReference(self::ADMINISTRATOR_REFERENCE, $administrator);
+    }
+
+    private function createDefaultUser (string $name, Role $role, Campus $campus) : User
+    {
+        $lowerName = mb_strtolower($name);
+
         $user = new User();
         $user
-            ->setEmail('user@example.org')
-            ->setNickname('User')
+            ->setEmail($lowerName . '@' . self::DOMAIN)
+            ->setNickname($name)
             ->setPassword(
-                $this->userPasswordHasher->hashPassword($user, 'user')
+                $this->userPasswordHasher->hashPassword($user, $lowerName)
             )
-            ->setName('User-name')
-            ->setSurname('User-surname')
+            ->setName($name . '-name')
+            ->setSurname($name . '-surname')
             ->setPhoneNumber('0102030405')
-            ->setCampus(
-                $this->getReference(CampusFixtures::ONLINE_CAMPUS_REFERENCE)
-            )
-            ->addRole(
-                $this->getReference(RoleFixtures::USER_REFERENCE)
-            );
-        $manager->persist($user);
+            ->setCampus($campus)
+            ->addRole($role);
 
-        $administrator = new User();
-        $administrator
-            ->setEmail('administrator@example.org')
-            ->setNickname('Administrator')
-            ->setPassword(
-                $this->userPasswordHasher->hashPassword($administrator, 'administrator')
-            )
-            ->setName('Administrator-name')
-            ->setSurname('Administrator-surname')
-            ->setPhoneNumber('0607080900')
-            ->setCampus(
-                $this->getReference(CampusFixtures::ONLINE_CAMPUS_REFERENCE)
-            )
-            ->addRole(
-                $this->getReference(RoleFixtures::ADMINISTRATOR_REFERENCE)
-            );
-        $manager->persist($administrator);
-
-        $manager->flush();
-
-        $this->addReference(self::USER_REFERENCE, $user);
-        $this->addReference(self::ADMINISTRATOR_REFERENCE, $administrator);
+        return $user;
     }
 }
