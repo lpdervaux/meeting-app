@@ -252,4 +252,24 @@ class Meetup
 
         return $this;
     }
+
+    public function getStatus (?\DateTimeImmutable $from) : MeetupStatus
+    {
+        if ( $this->isCancelled() )
+            $status = MeetupStatus::Cancelled;
+        else
+        {
+            $from = ( $from ) ?: new \DateTimeImmutable();
+            $status = match (true)
+            {
+                ( $from < $this->registrationStart ) => MeetupStatus::Scheduled,
+                ( $from < $this->registrationEnd ) => MeetupStatus::Open,
+                ( $from < $this->start ) => MeetupStatus::Closed,
+                ( $from < $this->end ) => MeetupStatus::Ongoing,
+                default => MeetupStatus::Concluded
+            };
+        }
+
+        return $status;
+    }
 }
