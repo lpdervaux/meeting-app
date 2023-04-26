@@ -45,11 +45,11 @@ class UserFixtures
 
         $administratorRole = $this->getReference(RoleFixtures::ADMINISTRATOR);
 
-        $defaultUser = $this->generate(nickname: 'user');
+        $defaultUser = $this->generate(nickname: 'user', email: 'user@example.org');
         $manager->persist($defaultUser);
         $this->addReference(self::DEFAULT_USER, $defaultUser);
 
-        $defaultAdministrator = $this->generate(nickname: 'administrator', roles: [ $administratorRole ]);
+        $defaultAdministrator = $this->generate(nickname: 'administrator', email: 'administrator@example.org', roles: [ $administratorRole ]);
         $manager->persist($defaultAdministrator);
         $this->addReference(self::DEFAULT_ADMINISTRATOR, $defaultAdministrator);
 
@@ -67,16 +67,18 @@ class UserFixtures
         ?string $name = null,
         ?string $surname = null,
         ?string $nickname = null,
+        ?string $email = null,
         ?array $roles = null
     ) : User
     {
         $name = ( $name ) ?: $this->generator->firstName();
         $surname = ( $surname ) ?: $this->generator->lastName();
         $nickname = ( $nickname ) ?: $this->generateUniqueNickname($name, $surname);
+        $email = ( $email ) ?: $nickname . '@' . $this->generator->safeEmailDomain();
 
         $user = new User();
         $user
-            ->setEmail($nickname . '@' . $this->generator->safeEmailDomain())
+            ->setEmail($email)
             ->setNickname($nickname)
             ->setPassword($this->userPasswordHasher->hashPassword($user, $nickname))
             ->setName($name)
