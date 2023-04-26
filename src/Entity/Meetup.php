@@ -272,4 +272,9 @@ class Meetup
 
         return $status;
     }
+
+    public function getDuration () : \DateInterval
+    {
+        return $this->start->diff($this->end, true);
+    }
 }
