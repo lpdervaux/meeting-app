@@ -35,10 +35,10 @@ class MeetupFixtures
 
     // TODO: tidy up
     protected function generate (
-        \DateTimeImmutable $start = null,
-        \DateTimeImmutable $end = null,
-        \DateTimeImmutable $registrationStart = null,
-        \DateTimeImmutable $registrationEnd = null,
+        ?\DateTimeImmutable $start = null,
+        ?\DateTimeImmutable $end = null,
+        ?\DateTimeImmutable $registrationStart = null,
+        ?\DateTimeImmutable $registrationEnd = null,
     ) : Meetup
     {
         try {

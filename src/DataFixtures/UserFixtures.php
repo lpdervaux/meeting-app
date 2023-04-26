@@ -64,10 +64,10 @@ class UserFixtures
     }
 
     protected function generate (
-        string $name = null,
-        string $surname = null,
-        string $nickname = null,
-        array $roles = null
+        ?string $name = null,
+        ?string $surname = null,
+        ?string $nickname = null,
+        ?array $roles = null
     ) : User
     {
         $name = ( $name ) ?: $this->generator->firstName();
