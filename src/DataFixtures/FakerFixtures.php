@@ -21,7 +21,7 @@ abstract class FakerFixtures extends Fixture
         $this->generator->unique(true);
     }
 
-    public function initialize (ObjectManager $manager) : void
+    private function initialize (ObjectManager $manager) : void
     {
         $this->manager = $manager;
     }
