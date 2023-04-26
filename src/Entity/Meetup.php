@@ -253,7 +253,7 @@ class Meetup
         return $this;
     }
 
-    public function getStatus (?\DateTimeImmutable $from) : MeetupStatus
+    public function getStatus (?\DateTimeImmutable $from = null) : MeetupStatus
     {
         if ( $this->isCancelled() )
             $status = MeetupStatus::Cancelled;
