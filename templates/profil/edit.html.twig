@@ -1,18 +1,80 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Profil{% endblock %}
+{% block title %}Modifier les informations de {{ user.nickname }}{% endblock %}
 
 {% block body %}
-
-    <div >
-        <h1>Mon Profil</h1>
-
-        {{ form_start(profilEditForm) }}
-        {{ form_widget(profilEditForm) }}
-        <button type="submit" class="btn">Enregistrer</button>
-        <a href="{{ path('app_home') }}" >Annuler</a>
-        {{ form_end(profilEditForm) }}
-
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-center">{{ user.nickname }}</h2>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(profilEditForm) }}
+                        <div class="form-group">
+                            <div class="text-center mb-3">
+                                {% if user.imageName %}
+                                    <img src="{{ asset('images/user/' ~ user.imageName) }}" alt="User Image" class="img-fluid rounded-circle" style="max-width: 200px;">
+                                {% else %}
+                                    <img src="{{ asset('images/user/default.JPG') }}" alt="Default Image" class="img-fluid rounded-circle" style="max-width: 200px;">
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.nickname, 'Pseudo') }}
+                            {{ form_widget(profilEditForm.nickname, {'attr': {'class': 'form-control'}}) }}
+                            {% if profilEditForm.nickname.vars.errors|length > 0 %}
+                                <div class="alert alert-danger">
+                                    {% for error in profilEditForm.nickname.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.surname, 'Prénom') }}
+                            {{ form_widget(profilEditForm.surname, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.name, 'Nom') }}
+                            {{ form_widget(profilEditForm.name, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.phoneNumber, 'Téléphone') }}
+                            {{ form_widget(profilEditForm.phoneNumber, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.email, 'Email') }}
+                            {{ form_widget(profilEditForm.email, {'attr': {'class': 'form-control'}}) }}
+                            {% if profilEditForm.email.vars.errors|length > 0 %}
+                                <div class="alert alert-danger">
+                                    {% for error in profilEditForm.email.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.email, 'Mot de Passe') }}
+                            {{ form_widget(profilEditForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.campus, 'Campus') }}
+                            {{ form_widget(profilEditForm.campus, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(profilEditForm.imageFile, 'Télécharger le fichier') }}
+                            {{ form_widget(profilEditForm.imageFile) }}
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="{{ path('app_home') }}" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                    {{ form_end(profilEditForm) }}
+                </div>
+            </div>
+        </div>
     </div>
-
 {% endblock %}
