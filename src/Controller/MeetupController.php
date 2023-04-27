@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Campus;
+use App\Repository\MeetupRepository;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class MeetupController extends AbstractController
 {
     #[Route('/meetup', name: 'app_meetup_list')]
-    public function list(Request $request): Response
+    public function list(Request $request, MeetupRepository $meetupRepository): Response
     {
         $form = $this->createFormBuilder()
             ->add('campus', EntityType::class, [
@@ -59,8 +60,16 @@ class MeetupController extends AbstractController
             ])
             ->getForm();
 
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+            dump(true);
+        }
+
         return $this->render('meetup/index.html.twig', [
             'form' => $form,
+            //'meetup_list' => $meetupList
         ]);
     }
 }

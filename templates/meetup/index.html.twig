@@ -3,6 +3,41 @@
 {% block title %}Hello MeetupController!{% endblock %}
 
 {% block body %}
-    {{ form_start(form) }}
+    {{ form_start(form)}}
+    {{ form_widget(form) }}
+    <button type="submit" name="research_button" value="true">Rechercher</button>
+    {#
+    <table>
+        <tr>
+            <td>Nom de la sortie</td>
+            <td>Campus</td>
+            <td>Date de la sortie</td>
+            <td>Clôture</td>
+            <td>inscrits/places</td>
+            <td>Etat</td>
+            <td>Inscrit</td>
+            <td>Organisateur</td>
+            <td>Actions</td>
+        </tr>
+        {% for meetup in meetup_list %}
+            <tr>
+                <td>{{ meetup.name }}</td>
+                <td>{{ meetup.campus.name }}</td>
+                <td>{{ meetup.start | date}}</td>
+                <td>{{ meetup.registrationEnd | date}}</td>
+                <td>{{ meetup.attendees | length }}/{{ meetup.capacity }}</td>
+                <td> etat </td>
+                {% for ma in meetup.attendees %}
+                    {% if app.user.id == ma.id %}
+                        <td>inscrit</td>
+                    {% endif %}
+                {% endfor %}
+                <td>{{ meetup.coordinator.name}}</td>
+                <td> aucune action </td>
+            </tr>
+        {% endfor %}
+    </table>
+    #}
+    <button type="submit" name="create_button" value="true">Créer une sortie</button>
     {{ form_end(form) }}
 {% endblock %}

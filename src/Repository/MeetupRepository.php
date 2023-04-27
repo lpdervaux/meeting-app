@@ -41,6 +41,11 @@ class MeetupRepository extends ServiceEntityRepository
         }
     }
 
+    public function findWithFilters()
+    {
+
+    }
+
 //    /**
 //     * @return Meetup[] Returns an array of Meetup objects
 //     */
