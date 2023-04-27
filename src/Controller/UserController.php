@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class UserController extends AbstractController
 {
-    #[Route('/profil', name: 'app_user_list')]
+    #[Route('/profile', name: 'app_user_list')]
     public function list(UserRepository $userRepository, PaginatorInterface $paginator, Request $request): Response
     {
         $query = $userRepository->createQueryBuilder('u')
@@ -34,7 +34,7 @@ class UserController extends AbstractController
             20
         );
 
-        return $this->render('profil/admin/list.html.twig', [
+        return $this->render('profile/admin/list.html.twig', [
             'pagination' => $pagination,
             'current_page' => $pagination->getCurrentPageNumber(),
         ]);
@@ -42,7 +42,7 @@ class UserController extends AbstractController
     }
 
 
-    #[Route('/profil/{id}', name: 'app_user_profile', methods:['GET'])]
+    #[Route('/profile/{id}', name: 'app_user_profile', methods:['GET'])]
 
     public function profil(int $id, UserRepository $userRepository): Response
     {
@@ -56,7 +56,7 @@ class UserController extends AbstractController
             throw $this->createNotFoundException('This user do not exists! Sorry!');
         }
 
-        return $this->render('profil/details.html.twig', [
+        return $this->render('profile/details.html.twig', [
             //les passe à Twig
             "user" => $user
         ]);
@@ -81,12 +81,12 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        return $this->render('profil/admin/new.html.twig', [
+        return $this->render('profile/admin/new.html.twig', [
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/profil/{id}/edit', name: 'app_user_edit', methods:['GET', "POST"])]
+    #[Route('/profile/{id}/edit', name: 'app_user_edit', methods:['GET', "POST"])]
 
     public function edit(Security $security,Request $request, User $user,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
@@ -112,7 +112,7 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
         }
 
-        return $this->render('profil/edit.html.twig', [
+        return $this->render('profile/edit.html.twig', [
             'profilEditForm' => $form->createView(),
             'user' => $user,
         ]);
@@ -136,7 +136,7 @@ class UserController extends AbstractController
 
     }
 
-    #[Route('/profil/{id}', name: 'app_user_delete', methods: ['POST', 'DELETE'])]
+    #[Route('/profile/{id}', name: 'app_user_delete', methods: ['POST', 'DELETE'])]
     public function delete(EntityManagerInterface $entityManager, UserRepository $userRepository, int $id): Response
     {
         $user = $userRepository->find($id);
