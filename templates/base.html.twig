@@ -21,13 +21,15 @@
 <header>
     <h1><a href=""></a>Sortir.com</h1>
     <ul class="toolbar">
-        <li><a href="{{ path('app_home') }}">Accueil</a></li>
         {% if app.user %}
+            <li><a href="{{ path('app_meetup_list') }}">Accueil</a></li>
             <li><a href="">Ville</a></li>
             <li><a href="">Campus</a></li>
+            <li><a href="{{ path('app_user_list') }}">Liste utilisateurs</a></li>
             <li><a href="{{ path('app_user_edit', {'id': app.user.id}) }}">Mon profil</a></li>
             <li><a href="{{ path('app_logout') }}">Se déconnecter</a></li>
         {% else %}
+            <li><a href="{{ path('app_home') }}">Accueil</a></li>
             <li><a href="{{ path('app_login')}}">Se connecter</a></li>
         {% endif %}
     </ul>
