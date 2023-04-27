@@ -18,8 +18,6 @@ class MeetupController extends AbstractController
     #[Route('/meetup', name: 'app_meetup_list')]
     public function list(Request $request, MeetupRepository $meetupRepository): Response
     {
-        global $meetupList;
-
         $form = $this->createFormBuilder()
             ->add('campus', EntityType::class, [
                 'class' => Campus::class,
@@ -69,6 +67,8 @@ class MeetupController extends AbstractController
             dump(true);
             $meetupList = $meetupRepository->findWithFilters();
         }
+
+        $meetupList = $meetupRepository->findWithFilters();
 
         return $this->render('meetup/index.html.twig', [
             'form' => $form,

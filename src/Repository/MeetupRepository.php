@@ -45,7 +45,7 @@ class MeetupRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('meetup');
 
-        $qb->orWhere("meetup.id = 109");
+        $qb->andWhere("meetup.id = 109");
         $query = $qb->getQuery();
         return $query->getResult();
 
