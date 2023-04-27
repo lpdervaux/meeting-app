@@ -6,7 +6,6 @@
     {{ form_start(form)}}
     {{ form_widget(form) }}
     <button type="submit" name="research_button" value="true">Rechercher</button>
-    {#
     <table>
         <tr>
             <td>Nom de la sortie</td>
@@ -37,7 +36,6 @@
             </tr>
         {% endfor %}
     </table>
-    #}
     <button type="submit" name="create_button" value="true">Créer une sortie</button>
     {{ form_end(form) }}
 {% endblock %}

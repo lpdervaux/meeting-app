@@ -43,7 +43,10 @@ class MeetupRepository extends ServiceEntityRepository
 
     public function findWithFilters()
     {
-        $qb = $this->createQueryBuilder('meetup');
+        $qb = $this->createQueryBuilder('meetup')
+            ->orWhere("id = 109");
+        $query = $qb->getQuery();
+        return $query->getResult();
 
     }
 
