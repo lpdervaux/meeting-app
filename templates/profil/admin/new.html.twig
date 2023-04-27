@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un nouvel utilisateur{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-center">Créer un nouvel utilisateur</h2>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                        {% if form_errors(form) %}
+                            <div class="alert alert-danger">
+                                {{ form_errors(form) }}
+                            </div>
+                        {% endif %}
+                        <div class="form-group">
+                            {{ form_label(form.nickname, 'Pseudo') }}
+                            {{ form_widget(form.nickname, {'attr': {'class': 'form-control'}}) }}
+                            {% if form.nickname.vars.errors|length > 0 %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.nickname.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.surname, 'Prénom') }}
+                            {{ form_widget(form.surname, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.name, 'Nom') }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.phoneNumber, 'Téléphone') }}
+                            {{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.email, 'Email') }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                            {% if form.email.vars.errors|length > 0 %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.email.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.plainPassword, 'Mot de Passe') }}
+                            {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.campus, 'Campus') }}
+                            {{ form_widget(form.campus, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.imageFile, 'Télécharger le fichier') }}
+                            {{ form_widget(form.imageFile) }}
+                        </div>
+                        <div class="card-footer text-center">
+                            <button type="submit" class="btn btn-primary">Créer</button>
+                            <a href="{{ path('app_home') }}" class="btn btn-secondary">Annuler</a>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

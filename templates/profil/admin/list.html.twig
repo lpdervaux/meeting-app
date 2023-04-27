@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1>Liste des utilisateurs</h1>
+        <div class="row">
+            {% for user in pagination %}
+                <div class="col-12 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ user.nickname }}</h5>
+                            <a href="{{ path('app_user_profile', {'id': user.id}) }}" class="btn btn-primary">Voir le profil</a>
+                            <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <nav>
+            {{ knp_pagination_render(pagination) }}
+        </nav>
+    </div>
+{% endblock %}
