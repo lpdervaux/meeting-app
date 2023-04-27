@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\RoleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
 class Role
@@ -16,12 +17,16 @@ class Role
     private ?int $id = null;
 
     #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotNull]
+    #[Assert\Regex(pattern: '^ROLE_')]
     private ?string $role = null;
 
     #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank]
     private ?string $label = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $description = null;
 
     public function getId(): ?int

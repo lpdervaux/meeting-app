@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -20,6 +21,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotNull]
+    #[Assert\Email]
     private ?string $email = null;
 
     /**
@@ -29,22 +32,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank]
     private ?string $nickname = null;
 
     #[ORM\ManyToMany(targetEntity: Role::class)]
     private Collection $roles;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
     private ?string $surname = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank]
     private ?string $phoneNumber = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?Campus $campus = null;
 
     #[ORM\ManyToMany(targetEntity: Meetup::class, mappedBy: 'attendees')]

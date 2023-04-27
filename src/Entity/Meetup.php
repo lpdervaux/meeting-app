@@ -9,7 +9,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
+// TODO: class validator for cancelled state
 #[ORM\Entity(repositoryClass: MeetupRepository::class)]
 class Meetup
 {
@@ -19,45 +21,61 @@ class Meetup
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(allowNull: true)]
     private ?string $description = null;
 
     #[ORM\Column(options: ['unsigned' => true])]
+    #[Assert\NotNull]
+    #[Assert\Positive]
     private ?int $capacity = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?Location $location = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?Campus $campus = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?User $coordinator = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $start = null;
-
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $end = null;
-
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    #[Assert\NotNull]
     private ?\DateTimeImmutable $registrationStart = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(propertyPath: 'registrationStart')]
     private ?\DateTimeImmutable $registrationEnd = null;
 
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(propertyPath: 'registrationEnd')]
+    private ?\DateTimeImmutable $start = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(propertyPath: 'start')]
+    private ?\DateTimeImmutable $end = null;
+
     #[ORM\Column]
+    #[Assert\NotNull]
     private ?bool $cancelled = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $cancellationDate = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(allowNull: true)]
     private ?string $cancellationReason = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'meetups')]

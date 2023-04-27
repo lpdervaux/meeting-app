@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\LocationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LocationRepository::class)]
 class Location
@@ -16,15 +17,19 @@ class Location
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $address = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: -90, max: 90)]
     private ?float $latitude = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: -180, max: 180)]
     private ?float $longitude = null;
 
     #[ORM\ManyToOne]
