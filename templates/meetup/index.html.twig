@@ -17,6 +17,7 @@
             <td>Organisateur</td>
             <td>Actions</td>
         </tr>
+        {% set registered = 'false' %}
         {% if meetup_list | length !=0 and meetup_list!=null %}
         {% for meetup in meetup_list %}
             <tr>
@@ -28,12 +29,22 @@
                 {% for ma in meetup.attendees %}
                     {% if app.user.id == ma.id %}
                         <td>inscrit</td>
+                        {% set registered = 'true' %}
                     {% endif %}
                 {% endfor %}
                 <td>{{ meetup.coordinator.name}}</td>
                 <td>
+                    <a href="">Afficher</a>
                     {% if meetup.coordinator == app.user %}
-                        coucou
+                        <a href="">Modifier</a>
+                    {% endif %}
+                    {% if meetup.status.name == 'Open' %}
+                        {% if registered == 'false' %}
+                            <a href="">S'inscrire</a>
+                        {% endif %}
+                        {% if registered == 'true' %}
+                            <a href="">Se désister</a>
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
