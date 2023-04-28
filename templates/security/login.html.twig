@@ -5,6 +5,9 @@
 {% block body %}
     <h2 class="h3 mb-3 font-weight-normal">Authentification</h2>
     <form method="post">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
         {% if error %}
             {# <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div> #}
             <div class="alert alert-danger">Vos informations d'authentification sont incorrectes !</div>

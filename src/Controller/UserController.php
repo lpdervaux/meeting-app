@@ -11,6 +11,7 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -77,6 +78,7 @@ class UserController extends AbstractController
             $user->addRole($userRole);
 
             $this->handleFormSubmission($user, $form, $entityManager, $passwordHasher);
+            $this->addFlash('success', 'Nouvel utilisateur créé avec succès.');
 
             return $this->redirectToRoute('app_login');
         }
@@ -90,10 +92,6 @@ class UserController extends AbstractController
 
     public function edit(Security $security,Request $request, User $user,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        // Vérifie si l'utilisateur est connecté
-        if (!$security->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirectToRoute('app_login');
-        }
 
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
@@ -104,10 +102,10 @@ class UserController extends AbstractController
             $email = $formData->getEmail();
             if ($email !== $user->getEmail() && $entityManager->getRepository(User::class)->findOneBy(['email' => $email])) {
                 $this->addFlash('error', 'Cet email est déjà utilisé par un autre utilisateur.');
-                return $this->redirectToRoute('app_user_edit');
             }
 
             $this->handleFormSubmission($user, $form, $entityManager, $passwordHasher);
+            $this->addFlash('success', 'Modification réussie !');
 
             return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
         }
@@ -132,7 +130,6 @@ class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Nouvel utilisateur créé avec succès.');
 
     }
 
@@ -147,7 +144,7 @@ class UserController extends AbstractController
         $entityManager->remove($user);
         $entityManager->flush();
 
-        $this->addFlash('success', 'User has been deleted successfully');
+        $this->addFlash('success', 'Utilisateur supprimer avec succès');
 
         return $this->redirectToRoute('app_user_list');
     }

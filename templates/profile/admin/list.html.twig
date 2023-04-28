@@ -1,6 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
     <div class="container">
         <h1>Liste des utilisateurs</h1>
         <div class="row">
@@ -12,7 +15,7 @@
                             <a href="{{ path('app_user_profile', {'id': user.id}) }}" class="btn btn-primary">Voir le profil</a>
                             <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" class="d-inline">
                                 <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                                <button class="btn btn-danger">Supprimer</button>
                             </form>
                         </div>
                     </div>
