@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Meetup;
 use App\Entity\User;
-use App\Form\NewMeetupType;
+use App\Form\MeetupType;
 use App\Repository\MeetupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +29,7 @@ class MeetupController extends AbstractController
         $meetup->setCoordinator($user);
         $meetup->setCancelled(false);
 
-        $form = $this->createForm(NewMeetupType::class, $meetup);
+        $form = $this->createForm(MeetupType::class, $meetup);
         $form->handleRequest($request);
 
         if ( $form->isSubmitted() && $form->isValid() )

@@ -1,11 +1,28 @@
 {% extends 'base.html.twig' %}
 
+{% form_theme newMeetupFormView 'bootstrap_5_layout.html.twig' %}
+
 {% block title %}Nouvelle sortie{% endblock %}
 
 {% block body %}
-    <h1>Nouvelle sortie</h1>
-    {{ form_start(newMeetupFormView) }}
-        {{ form_widget(newMeetupFormView) }}
-        <button type="submit">Créer</button>
-    {{ form_end(newMeetupFormView) }}
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-sm-11 col-md-10 col-lg-9 col-xl-8 col-xxl-6 mx-auto mb-5">
+                <div class="card">
+                    <div class="card-header px-0">
+                        <h2 class="text-center">
+                            Nouvelle sortie
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(newMeetupFormView) }}
+                        {{ form_widget(newMeetupFormView) }}
+                        <button class="form-control btn btn-primary" type="submit">Créer</button>
+                        {{ form_end(newMeetupFormView) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 {% endblock %}

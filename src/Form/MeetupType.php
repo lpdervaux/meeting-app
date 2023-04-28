@@ -10,7 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class NewMeetupType extends AbstractType
+class MeetupType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -54,14 +54,14 @@ class NewMeetupType extends AbstractType
                 'start',
                 options: [
                     'widget' => 'single_text',
-                    'label' => 'Ouverture'
+                    'label' => 'Début de sortie'
                 ]
             )
             ->add(
                 'end',
                 options: [
                     'widget' => 'single_text',
-                    'label' => 'Clôture'
+                    'label' => 'Fin de sortie'
                 ]
             )
         ;
