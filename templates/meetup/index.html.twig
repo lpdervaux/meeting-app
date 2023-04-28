@@ -18,6 +18,7 @@
             <td>Organisateur</td>
             <td>Actions</td>
         </tr>
+        {% if meetup_list | length !=0 and meetup_list!=null %}
         {% for meetup in meetup_list %}
             <tr>
                 <td>{{ meetup.name }}</td>
@@ -35,6 +36,7 @@
                 <td> aucune action </td>
             </tr>
         {% endfor %}
+        {% endif %}
     </table>
     <button type="submit" name="create_button" value="true">Créer une sortie</button>
     {{ form_end(form) }}

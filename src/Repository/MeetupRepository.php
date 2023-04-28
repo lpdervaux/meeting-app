@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Meetup;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,11 +42,57 @@ class MeetupRepository extends ServiceEntityRepository
         }
     }
 
-    public function findWithFilters()
+    public function findWithFilters($filters, $user)
     {
-        $qb = $this->createQueryBuilder('meetup');
 
-        $qb->andWhere("meetup.id = 109");
+        $qb = $this->createQueryBuilder('meetup')
+            //->innerJoin('meetup.attendees', 'attendee')
+            //->addSelect('attendee')
+            ->innerJoin('meetup.coordinator', 'coordinator')
+            ->addSelect('coordinator')
+            ->leftJoin('meetup.attendees','attendee')
+            ->addSelect('attendee')
+            ->innerJoin('meetup.campus', 'campus')
+            ->addSelect('campus');
+
+        if($filters['campus'])
+        {
+           $qb->where('campus = :campus ')
+               ->setParameter('campus', $filters['campus']);
+        }
+
+        if($filters['research'])
+        {
+
+        }
+
+        if($filters['start'] && $filters['end'])
+        {
+
+        }
+
+        if($filters['coordinator'])
+        {
+            $qb->andWhere('coordinator = :coordinator')
+                ->setParameter('coordinator', $user);
+        }
+
+        if($filters['registered'])
+        {
+            $qb->andWhere('attendee = :user')
+                ->setParameter('user', $user);
+        }
+
+        if($filters['no_registered'])
+        {
+
+        }
+
+        if($filters['past'])
+        {
+
+        }
+
         $query = $qb->getQuery();
         return $query->getResult();
 

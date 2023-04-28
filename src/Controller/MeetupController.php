@@ -62,13 +62,14 @@ class MeetupController extends AbstractController
 
         $form->handleRequest($request);
 
+        $meetupList=null;
+
         if($form->isSubmitted() && $form->isValid())
         {
-            dump(true);
-            $meetupList = $meetupRepository->findWithFilters();
+            $filters = $form->getData();
+            $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
+            dump($meetupList);
         }
-
-        $meetupList = $meetupRepository->findWithFilters();
 
         return $this->render('meetup/index.html.twig', [
             'form' => $form,
