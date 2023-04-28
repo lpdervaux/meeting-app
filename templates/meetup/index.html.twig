@@ -35,17 +35,16 @@
                 <td>{{ meetup.coordinator.name}}</td>
                 <td>
                     <a href="">Afficher</a>
-                    {% if meetup.coordinator == app.user %}
+                    {% if registered == 'false' and meetup.status.name == 'Open'%}
+                        <a href="">S'inscrire</a>
+                    {% endif %}
+                    {% if registered == 'true' and (meetup.status.name == 'Open' or meetup.status.name == 'close') %}
+                        <a href="">Se désister</a>
+                    {% endif %}
+                    {% if (meetup.coordinator == app.user or is_granted('ROLE_ADMINISTRATOR')) and meetup.status.name == 'Open' %}
                         <a href="">Modifier</a>
                     {% endif %}
-                    {% if meetup.status.name == 'Open' %}
-                        {% if registered == 'false' %}
-                            <a href="">S'inscrire</a>
-                        {% endif %}
-                        {% if registered == 'true' %}
-                            <a href="">Se désister</a>
-                        {% endif %}
-                    {% endif %}
+
                 </td>
             </tr>
         {% endfor %}
