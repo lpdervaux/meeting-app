@@ -7,9 +7,11 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -19,7 +21,9 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository
+    extends ServiceEntityRepository
+    implements PasswordUpgraderInterface, UserLoaderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -56,6 +60,23 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
 
         $this->save($user, true);
+    }
+
+    public function loadUserByIdentifier (string $identifier) : ?UserInterface
+    {
+        return $this
+            ->getEntityManager()
+            ->createQuery(
+                <<<DQL
+                SELECT user, roles
+                FROM App\Entity\User user
+                    LEFT JOIN user.roles roles
+                WHERE user.email = :identifier
+                    OR user.nickname = :identifier
+                DQL
+            )
+            ->setParameter('identifier', $identifier)
+            ->getOneOrNullResult();
     }
 
 //    /**
