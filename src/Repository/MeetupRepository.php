@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Meetup;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\AST\LikeExpression;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -46,8 +47,6 @@ class MeetupRepository extends ServiceEntityRepository
     {
 
         $qb = $this->createQueryBuilder('meetup')
-            //->innerJoin('meetup.attendees', 'attendee')
-            //->addSelect('attendee')
             ->innerJoin('meetup.coordinator', 'coordinator')
             ->addSelect('coordinator')
             ->leftJoin('meetup.attendees','attendee')
@@ -63,12 +62,15 @@ class MeetupRepository extends ServiceEntityRepository
 
         if($filters['research'])
         {
-
+            $qb->andWhere('meetup.name LIKE :research')
+                ->setParameter('research',"%{$filters['research']}%");
         }
 
         if($filters['start'] && $filters['end'])
         {
-
+            $qb->andWhere('meetup.start BETWEEN :start AND :end')
+                ->setParameter('start', $filters['start'])
+                ->setParameter('end', $filters['end']);
         }
 
         if($filters['coordinator'])
@@ -90,9 +92,11 @@ class MeetupRepository extends ServiceEntityRepository
 
         if($filters['past'])
         {
-
+            $qb->andWhere('meetup.end < :past')
+                ->setParameter('past', new \DateTimeImmutable());
         }
 
+        $qb->orderBy('meetup.start', 'DESC');
         $query = $qb->getQuery();
         return $query->getResult();
 
