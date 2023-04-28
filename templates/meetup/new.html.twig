@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle sortie{% endblock %}
+
+{% block body %}
+    <h1>Nouvelle sortie</h1>
+    {{ form_start(newMeetupFormView) }}
+        {{ form_widget(newMeetupFormView) }}
+        <button type="submit">Créer</button>
+    {{ form_end(newMeetupFormView) }}
+{% endblock %}

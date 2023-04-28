@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sortie : {{ meetup.name }}{% endblock %}
+
+{% block body %}
+<article>
+    <h1>{{ meetup.name }}</h1>
+
+    <p>{{ meetup.description }}</p>
+
+    <p>Ouverture : {{ meetup.start | format_datetime() }}</p>
+    <p>Clôture : {{ meetup.end | format_datetime() }}</p>
+
+    <p>
+        Organisateur :
+        <a href="#">{{ meetup.coordinator.name }} {{ meetup.coordinator.surname }}</a>
+    </p>
+    <p>Campus : {{ meetup.campus.name }}</p>
+    <p>Lieu : {{ meetup.location.name }} ({{ meetup.location.address }})</p>
+</article>
+{% endblock %}
+
+

@@ -67,7 +67,7 @@ class Meetup
     #[Assert\GreaterThan(propertyPath: 'start')]
     private ?\DateTimeImmutable $end = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: [ 'default' => false ])]
     #[Assert\NotNull]
     private ?bool $cancelled = null;
 
