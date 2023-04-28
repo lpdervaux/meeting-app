@@ -45,7 +45,6 @@ class MeetupRepository extends ServiceEntityRepository
 
     public function findWithFilters($filters, $user)
     {
-
         $qb = $this->createQueryBuilder('meetup')
             ->innerJoin('meetup.coordinator', 'coordinator')
             ->addSelect('coordinator')
@@ -73,21 +72,46 @@ class MeetupRepository extends ServiceEntityRepository
                 ->setParameter('end', $filters['end']);
         }
 
-        if($filters['coordinator'])
+        if($filters['coordinator'] && $filters['registered'] && $filters['no_registered'])
         {
-            $qb->andWhere('coordinator = :coordinator')
-                ->setParameter('coordinator', $user);
+            $qb->andWhere('(coordinator = :user OR attendee = :user OR attendee != :user OR attendee IS NULL)')
+                ->setParameter('user', $user);
         }
 
-        if($filters['registered'])
+        if($filters['coordinator'] && $filters['registered'] && !$filters['no_registered'])
+        {
+            $qb->andWhere('(coordinator = :user OR attendee = :user)')
+                ->setParameter('user', $user);
+        }
+
+        if(!$filters['coordinator'] && $filters['registered'] && $filters['no_registered'])
+        {
+            $qb->andWhere('(attendee = :user OR attendee != :user OR attendee IS NULL)')
+                ->setParameter('user', $user);
+        }
+
+        if($filters['coordinator'] && !$filters['registered'] && $filters['no_registered'])
+        {
+            $qb->andWhere('(coordinator = :user OR attendee != :user OR attendee IS NULL)')
+                ->setParameter('user', $user);
+        }
+
+        if($filters['coordinator'] && !$filters['registered'] && !$filters['no_registered'])
+        {
+            $qb->andWhere('coordinator = :user')
+                ->setParameter('user', $user);
+        }
+
+        if(!$filters['coordinator'] && $filters['registered'] && !$filters['no_registered'])
         {
             $qb->andWhere('attendee = :user')
                 ->setParameter('user', $user);
         }
 
-        if($filters['no_registered'])
+        if(!$filters['coordinator'] && !$filters['registered'] && $filters['no_registered'])
         {
-
+            $qb->andWhere('(attendee != :user OR attendee IS NULL)')
+                ->setParameter('user', $user);
         }
 
         if($filters['past'])
@@ -99,7 +123,6 @@ class MeetupRepository extends ServiceEntityRepository
         $qb->orderBy('meetup.start', 'DESC');
         $query = $qb->getQuery();
         return $query->getResult();
-
     }
 
 //    /**

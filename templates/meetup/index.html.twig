@@ -9,7 +9,6 @@
     <table>
         <tr>
             <td>Nom de la sortie</td>
-            <td>Campus</td>
             <td>Date de la sortie</td>
             <td>Clôture</td>
             <td>inscrits/places</td>
@@ -22,18 +21,21 @@
         {% for meetup in meetup_list %}
             <tr>
                 <td>{{ meetup.name }}</td>
-                <td>{{ meetup.campus.name }}</td>
                 <td>{{ meetup.start | date}}</td>
                 <td>{{ meetup.registrationEnd | date}}</td>
                 <td>{{ meetup.attendees | length }}/{{ meetup.capacity }}</td>
-                <td> etat </td>
+                <td>{{ meetup.status.value}} </td>
                 {% for ma in meetup.attendees %}
                     {% if app.user.id == ma.id %}
                         <td>inscrit</td>
                     {% endif %}
                 {% endfor %}
                 <td>{{ meetup.coordinator.name}}</td>
-                <td> aucune action </td>
+                <td>
+                    {% if meetup.coordinator == app.user %}
+                        coucou
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         {% endif %}

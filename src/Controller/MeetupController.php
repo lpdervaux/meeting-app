@@ -68,6 +68,7 @@ class MeetupController extends AbstractController
         {
             $filters = $form->getData();
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
+            //dd($meetupList[0]->getStatus());
             dump($meetupList);
         }
 
