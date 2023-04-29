@@ -82,231 +82,229 @@ class MeetupRepository extends ServiceEntityRepository
             ->innerJoin('meetup.campus', 'campus')
             ->addSelect('campus');
 
-        if($filters['campus'])
+        if ($filters['campus'])
         {
-           $qb->where(CAMPUS_CONDITION)
-               ->setParameter('campus', $filters['campus']);
+            $qb->where(CAMPUS_CONDITION)
+                ->setParameter('campus', $filters['campus']);
         }
 
-        if($filters['research'])
+        if ($filters['research'])
         {
             $qb->andWhere(RESEARCH_CONDITION)
-                ->setParameter('research',"%{$filters['research']}%");
+                ->setParameter('research', "%{$filters['research']}%");
         }
 
-        if(
+        if (
             $filters['start'] &&
             $filters['end']
-        )
-        {
+        ) {
             $qb->andWhere(START_END_CONDITION)
                 ->setParameter('start', $filters['start'])
                 ->setParameter('end', $filters['end']);
         }
 
-        if(
+        if (
             $filters['coordinator']   &&
             $filters['registered']    &&
             $filters['no_registered'] &&
             $filters['past']
-        )
-        {
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR 
-                    '.REGISTERED_CONDITION.'    OR 
-                    '.NO_REGISTERED_CONDITION.' OR 
-                    '.PAST_CONDITION.'
+                    ' . COORDINATOR_CONDITION . '   OR 
+                    ' . REGISTERED_CONDITION . '    OR 
+                    ' . NO_REGISTERED_CONDITION . ' OR 
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']   &&
             $filters['registered']    &&
             $filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR 
-                    '.REGISTERED_CONDITION.'    OR 
-                    '.NO_REGISTERED_CONDITION.'
+                    ' . COORDINATOR_CONDITION . '   OR 
+                    ' . REGISTERED_CONDITION . '    OR 
+                    ' . NO_REGISTERED_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']    &&
             $filters['registered']     &&
             !$filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR 
-                    '.REGISTERED_CONDITION.'    OR 
-                    '.PAST_CONDITION.'
+                    ' . COORDINATOR_CONDITION . '   OR 
+                    ' . REGISTERED_CONDITION . '    OR 
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']   &&
             !$filters['registered']   &&
             $filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR 
-                    '.NO_REGISTERED_CONDITION.' OR 
-                    '.PAST_CONDITION.'
+                    ' . COORDINATOR_CONDITION . '   OR 
+                    ' . NO_REGISTERED_CONDITION . ' OR 
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             !$filters['coordinator']  &&
             $filters['registered']    &&
             $filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.REGISTERED_CONDITION.'    OR 
-                    '.NO_REGISTERED_CONDITION.' OR 
-                    '.PAST_CONDITION.'
+                    ' . REGISTERED_CONDITION . '    OR 
+                    ' . NO_REGISTERED_CONDITION . ' OR 
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']    &&
             $filters['registered']     &&
             !$filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR 
-                    '.REGISTERED_CONDITION.'
+                    ' . COORDINATOR_CONDITION . '   OR 
+                    ' . REGISTERED_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']    &&
             !$filters['registered']    &&
             !$filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR 
-                    '.PAST_CONDITION.'
+                    ' . COORDINATOR_CONDITION . '   OR 
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             !$filters['coordinator']  &&
             !$filters['registered']   &&
             $filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.NO_REGISTERED_CONDITION.' OR 
-                    '.PAST_CONDITION.'
+                    ' . NO_REGISTERED_CONDITION . ' OR 
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             !$filters['coordinator']  &&
             $filters['registered']    &&
             $filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.REGISTERED_CONDITION.'    OR 
-                    '.NO_REGISTERED_CONDITION.'
+                    ' . REGISTERED_CONDITION . '    OR 
+                    ' . NO_REGISTERED_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             !$filters['coordinator']   &&
             $filters['registered']     &&
             !$filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(
                 '( 
-                    '.REGISTERED_CONDITION.'    OR
-                    '.PAST_CONDITION.'
+                    ' . REGISTERED_CONDITION . '    OR
+                    ' . PAST_CONDITION . '
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']   &&
             !$filters['registered']   &&
             $filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(
                 '(
-                    '.COORDINATOR_CONDITION.'   OR
-                    '.NO_REGISTERED_CONDITION.' OR
+                    ' . COORDINATOR_CONDITION . '   OR
+                    ' . NO_REGISTERED_CONDITION . ' OR
                 )'
             );
         }
 
-        if(
+        if (
             $filters['coordinator']    &&
             !$filters['registered']    &&
             !$filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(COORDINATOR_CONDITION);
         }
 
-        if(
+        if (
             !$filters['coordinator']   &&
             $filters['registered']     &&
             !$filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(REGISTERED_CONDITION);
         }
 
-        if(
+        if (
             !$filters['coordinator']  &&
             !$filters['registered']   &&
             $filters['no_registered'] &&
-            !$filters['past'])
-        {
+            !$filters['past']
+        ) {
             $qb->andWhere(NO_REGISTERED_CONDITION);
         }
 
-        if(
+        if (
             !$filters['coordinator']   &&
             !$filters['registered']    &&
             !$filters['no_registered'] &&
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->andWhere(PAST_CONDITION);
         }
 
-        if(
+        if (
             $filters['coordinator']   ||
             $filters['registered']    ||
             $filters['no_registered'] ||
-            $filters['past'])
-        {
+            $filters['past']
+        ) {
             $qb->setParameter('user', $user)
                 ->setParameter('date', new \DateTimeImmutable());
         }

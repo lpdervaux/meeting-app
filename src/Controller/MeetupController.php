@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Campus;
+use App\Repository\CampusRepository;
 use App\Repository\MeetupRepository;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -16,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class MeetupController extends AbstractController
 {
     #[Route('/meetup', name: 'app_meetup_list')]
-    public function list(Request $request, MeetupRepository $meetupRepository): Response
+    public function list(Request $request, MeetupRepository $meetupRepository, CampusRepository $campusRepository): Response
     {
         $form = $this->createFormBuilder()
             ->add('campus', EntityType::class, [
@@ -44,15 +46,18 @@ class MeetupController extends AbstractController
             ])
             ->add('coordinator', CheckboxType::class, [
                 'label' => 'Sorties dont je suis l\'organisateur/trice : ',
-                'required' => false
+                'required' => false,
+                'attr' => ['checked' => true]
             ])
             ->add('registered', CheckboxType::class, [
                 'label' => 'Sorties auxquelles je suis inscrit/e : ',
-                'required' => false
+                'required' => false,
+                'attr' => ['checked' => true]
             ])
             ->add('no_registered', CheckboxType::class, [
                 'label' => 'Sorties auxquelles je ne suis pas inscrit/e : ',
-                'required' => false
+                'required' => false,
+                'attr' => ['checked' => true]
             ])
             ->add('past', CheckboxType::class, [
                 'label' => 'Sorties passées : ',
@@ -60,15 +65,30 @@ class MeetupController extends AbstractController
             ])
             ->getForm();
 
+        $campus = $campusRepository->findWithMinId();
+        $filters = array(
+            'campus' => $campus,
+            'research' => null,
+            'start' => null,
+            'end' => null,
+            'coordinator' => true,
+            'registered' => true,
+            'no_registered' => true,
+            'past' => false
+        );
+        //dd($campus);
         $form->handleRequest($request);
-
-        $meetupList=null;
+        //dd($filters);
 
         if($form->isSubmitted() && $form->isValid())
         {
             $filters = $form->getData();
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
             dump($meetupList);
+        }
+        else
+        {
+            $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
         }
 
         return $this->render('meetup/index.html.twig', [
