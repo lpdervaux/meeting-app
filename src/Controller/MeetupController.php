@@ -61,24 +61,14 @@ class MeetupController extends AbstractController
             ])
             ->add('past', CheckboxType::class, [
                 'label' => 'Sorties passées : ',
-                'required' => false
+                'required' => false,
+                'attr' => ['checked' => false]
             ])
             ->getForm();
 
-        $campus = $campusRepository->findWithMinId();
-        $filters = array(
-            'campus' => $campus,
-            'research' => null,
-            'start' => null,
-            'end' => null,
-            'coordinator' => true,
-            'registered' => true,
-            'no_registered' => true,
-            'past' => false
-        );
-        //dd($campus);
+
         $form->handleRequest($request);
-        //dd($filters);
+
 
         if($form->isSubmitted() && $form->isValid())
         {
@@ -88,6 +78,16 @@ class MeetupController extends AbstractController
         }
         else
         {
+            $filters = array(
+                'campus' => $campusRepository->findWithMinId(),
+                'research' => null,
+                'start' => null,
+                'end' => null,
+                'coordinator' => true,
+                'registered' => true,
+                'no_registered' => true,
+                'past' => false
+            );
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
         }
 

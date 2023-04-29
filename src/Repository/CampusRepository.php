@@ -47,10 +47,11 @@ class CampusRepository extends ServiceEntityRepository
             ->select('MIN(campus.name)');
         $query = $qb->getQuery();
         $minId = $query->getResult();
-        //dd($minId[0][1]);
+
         $qb = $this->createQueryBuilder('campus')
             ->where('campus.name = \''. $minId[0][1].'\'');
         $query = $qb->getQuery();
+
         return $query->getResult();
     }
 

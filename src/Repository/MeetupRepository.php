@@ -258,7 +258,7 @@ class MeetupRepository extends ServiceEntityRepository
             $qb->andWhere(
                 '(
                     ' . COORDINATOR_CONDITION . '   OR
-                    ' . NO_REGISTERED_CONDITION . ' OR
+                    ' . NO_REGISTERED_CONDITION . '
                 )'
             );
         }
