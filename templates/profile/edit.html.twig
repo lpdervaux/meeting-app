@@ -3,6 +3,9 @@
 {% block title %}Modifier les informations de {{ user.nickname }}{% endblock %}
 
 {% block body %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6 mx-auto">
@@ -70,7 +73,7 @@
                     </div>
                     <div class="card-footer text-center">
                         <a href="{{ path('app_home') }}" class="btn btn-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <button class="btn btn-primary">Enregistrer</button>
                     </div>
                     {{ form_end(profilEditForm) }}
                 </div>

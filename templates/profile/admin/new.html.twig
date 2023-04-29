@@ -3,6 +3,9 @@
 {% block title %}Créer un nouvel utilisateur{% endblock %}
 
 {% block body %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6 mx-auto">
@@ -65,7 +68,7 @@
                             {{ form_widget(form.imageFile) }}
                         </div>
                         <div class="card-footer text-center">
-                            <button type="submit" class="btn btn-primary">Créer</button>
+                            <button class="btn btn-primary">Créer</button>
                             <a href="{{ path('app_home') }}" class="btn btn-secondary">Annuler</a>
                         </div>
                         {{ form_end(form) }}
