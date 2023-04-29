@@ -45,6 +45,35 @@ class MeetupRepository extends ServiceEntityRepository
 
     public function findWithFilters($filters, $user)
     {
+        define(
+            'CAMPUS_CONDITION',
+            'campus = :campus'
+        );
+        define(
+            'RESEARCH_CONDITION',
+            'meetup.name LIKE :research'
+        );
+        define(
+            'START_END_CONDITION',
+            'meetup.start BETWEEN :start AND :end'
+        );
+        define(
+            'COORDINATOR_CONDITION',
+            'coordinator = :user AND :date IS NOT NULL'
+        );
+        define(
+            'REGISTERED_CONDITION',
+            'attendee = :user AND :date IS NOT NULL'
+        );
+        define(
+            'NO_REGISTERED_CONDITION',
+            '((attendee != :user OR attendee IS NULL) AND meetup.start > :date)'
+        );
+        define(
+            'PAST_CONDITION',
+            'meetup.end < :date AND :user IS NOT NULL'
+        );
+
         $qb = $this->createQueryBuilder('meetup')
             ->innerJoin('meetup.coordinator', 'coordinator')
             ->addSelect('coordinator')
@@ -55,69 +84,231 @@ class MeetupRepository extends ServiceEntityRepository
 
         if($filters['campus'])
         {
-           $qb->where('campus = :campus ')
+           $qb->where(CAMPUS_CONDITION)
                ->setParameter('campus', $filters['campus']);
         }
 
         if($filters['research'])
         {
-            $qb->andWhere('meetup.name LIKE :research')
+            $qb->andWhere(RESEARCH_CONDITION)
                 ->setParameter('research',"%{$filters['research']}%");
         }
 
-        if($filters['start'] && $filters['end'])
+        if(
+            $filters['start'] &&
+            $filters['end']
+        )
         {
-            $qb->andWhere('meetup.start BETWEEN :start AND :end')
+            $qb->andWhere(START_END_CONDITION)
                 ->setParameter('start', $filters['start'])
                 ->setParameter('end', $filters['end']);
         }
 
-        if($filters['coordinator'] && $filters['registered'] && $filters['no_registered'])
+        if(
+            $filters['coordinator']   &&
+            $filters['registered']    &&
+            $filters['no_registered'] &&
+            $filters['past']
+        )
         {
-            $qb->andWhere('(coordinator = :user OR attendee = :user OR attendee != :user OR attendee IS NULL)')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR 
+                    '.REGISTERED_CONDITION.'    OR 
+                    '.NO_REGISTERED_CONDITION.' OR 
+                    '.PAST_CONDITION.'
+                )'
+            );
         }
 
-        if($filters['coordinator'] && $filters['registered'] && !$filters['no_registered'])
+        if(
+            $filters['coordinator']   &&
+            $filters['registered']    &&
+            $filters['no_registered'] &&
+            !$filters['past'])
         {
-            $qb->andWhere('(coordinator = :user OR attendee = :user)')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR 
+                    '.REGISTERED_CONDITION.'    OR 
+                    '.NO_REGISTERED_CONDITION.'
+                )'
+            );
         }
 
-        if(!$filters['coordinator'] && $filters['registered'] && $filters['no_registered'])
+        if(
+            $filters['coordinator']    &&
+            $filters['registered']     &&
+            !$filters['no_registered'] &&
+            $filters['past'])
         {
-            $qb->andWhere('(attendee = :user OR attendee != :user OR attendee IS NULL)')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR 
+                    '.REGISTERED_CONDITION.'    OR 
+                    '.PAST_CONDITION.'
+                )'
+            );
         }
 
-        if($filters['coordinator'] && !$filters['registered'] && $filters['no_registered'])
+        if(
+            $filters['coordinator']   &&
+            !$filters['registered']   &&
+            $filters['no_registered'] &&
+            $filters['past'])
         {
-            $qb->andWhere('(coordinator = :user OR attendee != :user OR attendee IS NULL)')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR 
+                    '.NO_REGISTERED_CONDITION.' OR 
+                    '.PAST_CONDITION.'
+                )'
+            );
         }
 
-        if($filters['coordinator'] && !$filters['registered'] && !$filters['no_registered'])
+        if(
+            !$filters['coordinator']  &&
+            $filters['registered']    &&
+            $filters['no_registered'] &&
+            $filters['past'])
         {
-            $qb->andWhere('coordinator = :user')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.REGISTERED_CONDITION.'    OR 
+                    '.NO_REGISTERED_CONDITION.' OR 
+                    '.PAST_CONDITION.'
+                )'
+            );
         }
 
-        if(!$filters['coordinator'] && $filters['registered'] && !$filters['no_registered'])
+        if(
+            $filters['coordinator']    &&
+            $filters['registered']     &&
+            !$filters['no_registered'] &&
+            !$filters['past'])
         {
-            $qb->andWhere('attendee = :user')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR 
+                    '.REGISTERED_CONDITION.'
+                )'
+            );
         }
 
-        if(!$filters['coordinator'] && !$filters['registered'] && $filters['no_registered'])
+        if(
+            $filters['coordinator']    &&
+            !$filters['registered']    &&
+            !$filters['no_registered'] &&
+            $filters['past'])
         {
-            $qb->andWhere('(attendee != :user OR attendee IS NULL)')
-                ->setParameter('user', $user);
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR 
+                    '.PAST_CONDITION.'
+                )'
+            );
         }
 
-        if($filters['past'])
+        if(
+            !$filters['coordinator']  &&
+            !$filters['registered']   &&
+            $filters['no_registered'] &&
+            $filters['past'])
         {
-            $qb->andWhere('meetup.end < :past')
-                ->setParameter('past', new \DateTimeImmutable());
+            $qb->andWhere(
+                '(
+                    '.NO_REGISTERED_CONDITION.' OR 
+                    '.PAST_CONDITION.'
+                )'
+            );
+        }
+
+        if(
+            !$filters['coordinator']  &&
+            $filters['registered']    &&
+            $filters['no_registered'] &&
+            !$filters['past'])
+        {
+            $qb->andWhere(
+                '(
+                    '.REGISTERED_CONDITION.'    OR 
+                    '.NO_REGISTERED_CONDITION.'
+                )'
+            );
+        }
+
+        if(
+            !$filters['coordinator']   &&
+            $filters['registered']     &&
+            !$filters['no_registered'] &&
+            $filters['past'])
+        {
+            $qb->andWhere(
+                '( 
+                    '.REGISTERED_CONDITION.'    OR
+                    '.PAST_CONDITION.'
+                )'
+            );
+        }
+
+        if(
+            $filters['coordinator']   &&
+            !$filters['registered']   &&
+            $filters['no_registered'] &&
+            !$filters['past'])
+        {
+            $qb->andWhere(
+                '(
+                    '.COORDINATOR_CONDITION.'   OR
+                    '.NO_REGISTERED_CONDITION.' OR
+                )'
+            );
+        }
+
+        if(
+            $filters['coordinator']    &&
+            !$filters['registered']    &&
+            !$filters['no_registered'] &&
+            !$filters['past'])
+        {
+            $qb->andWhere(COORDINATOR_CONDITION);
+        }
+
+        if(
+            !$filters['coordinator']   &&
+            $filters['registered']     &&
+            !$filters['no_registered'] &&
+            !$filters['past'])
+        {
+            $qb->andWhere(REGISTERED_CONDITION);
+        }
+
+        if(
+            !$filters['coordinator']  &&
+            !$filters['registered']   &&
+            $filters['no_registered'] &&
+            !$filters['past'])
+        {
+            $qb->andWhere(NO_REGISTERED_CONDITION);
+        }
+
+        if(
+            !$filters['coordinator']   &&
+            !$filters['registered']    &&
+            !$filters['no_registered'] &&
+            $filters['past'])
+        {
+            $qb->andWhere(PAST_CONDITION);
+        }
+
+        if(
+            $filters['coordinator']   ||
+            $filters['registered']    ||
+            $filters['no_registered'] ||
+            $filters['past'])
+        {
+            $qb->setParameter('user', $user)
+                ->setParameter('date', new \DateTimeImmutable());
         }
 
         $qb->orderBy('meetup.start', 'DESC');

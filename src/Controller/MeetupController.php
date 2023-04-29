@@ -68,6 +68,7 @@ class MeetupController extends AbstractController
         {
             $filters = $form->getData();
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
+            dump($meetupList);
         }
 
         return $this->render('meetup/index.html.twig', [
