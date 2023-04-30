@@ -11,6 +11,7 @@
     {% if meetup.cancelled %}
     <div class="alert alert-{{ ( cancelAlert ) ? 'danger' : 'secondary' }}">
         <p>Cette sortie a été annulée</p>
+
         <p class="h6">Date</p>
         <p>{{ meetup.cancellationDate | format_datetime(locale='fr') }}</p>
         <p class="h6">Raison</p>
@@ -86,8 +87,11 @@
     </div>
 
     <div class="d-flex flex-row justify-content-evenly mb-4">
-        {% if registrationEnabled %}
+        {% if registerEnabled %}
         <button class="btn btn-primary" form="register" type="submit">S'inscrire</button>
+        {% endif %}
+        {% if desistEnabled %}
+        <button class="btn btn-primary" form="desist" type="submit">Se désister</button>
         {% endif %}
         {% if cancelEnabled %}
         <buttton class="btn btn-outline-primary"
@@ -97,10 +101,17 @@
         {% endif %}
     </div>
 
-    {% if registrationEnabled %}
+    {% if registerEnabled %}
         {{ form (
             registerFormView,
             { 'attr' : { 'id' : 'register' } }
+        ) }}
+    {% endif %}
+
+    {% if desistEnabled %}
+        {{ form (
+            desistFormView,
+            { 'attr' : { 'id' : 'desist' } }
         ) }}
     {% endif %}
 

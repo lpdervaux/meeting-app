@@ -6,4 +6,4 @@ namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
 
-class MeetupRegisterUserType extends AbstractType {}
+class MeetupDesistType extends AbstractType {}

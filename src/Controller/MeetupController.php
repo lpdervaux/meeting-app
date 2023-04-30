@@ -7,8 +7,9 @@ namespace App\Controller;
 use App\Entity\Meetup;
 use App\Entity\MeetupStatus;
 use App\Entity\User;
+use App\Form\MeetupDesistType;
 use App\Form\MeetupCancelType;
-use App\Form\MeetupRegisterUserType;
+use App\Form\MeetupRegisterType;
 use App\Form\MeetupType;
 use App\Repository\MeetupRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -46,19 +47,23 @@ class MeetupController extends AbstractController
             $response = $this->render('meetup/archived.html.twig');
         else
         {
-            $registrationEnabled = $meetup->canRegister($user);
+            $registerEnabled = $meetup->canRegister($user);
+            $desistEnabled = $meetup->getAttendees()->contains($user);
             $cancelEnabled = ( ! $meetup->isCancelled() )
                 && ( $user === $meetup->getCoordinator() || $this->isGranted('ROLE_ADMINISTRATOR') );
+
             $cancelAlert = ( $meetup->isCancelled() )
                 && ( $now < $meetup->getEnd() );
 
-            $registerForm = $this->createForm(MeetupRegisterUserType::class);
+            $registerForm = $this->createForm(MeetupRegisterType::class);
+            $desistForm = $this->createForm(MeetupDesistType::class);
             $cancelForm = $this->createForm(MeetupCancelType::class);
 
             $registerForm->handleRequest($request);
             if ( $registerForm->isSubmitted() && $registerForm->isValid() )
             {
-                if ( $registrationEnabled )
+                dump($registerForm->isSubmitted());
+                if ( $registerEnabled )
                 {
                     $meetup->addAttendee($user);
                     $entityManager->persist($meetup);
@@ -66,10 +71,30 @@ class MeetupController extends AbstractController
 
                     $this->addFlash('success', 'Inscription réussie');
 
-                    $registrationEnabled = false;
+                    $registerEnabled = false;
+                    $desistEnabled = true;
                 }
                 else
                     $this->addFlash('warning', 'Inscription échouée');
+            }
+
+            $desistForm->handleRequest($request);
+            if ( $desistForm->isSubmitted() && $desistForm->isValid() )
+            {
+                dump($desistForm->isSubmitted());
+                if ( $desistEnabled )
+                {
+                    $meetup->removeAttendee($user);
+                    $entityManager->persist($meetup);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Désistement réussi');
+
+                    $desistEnabled = false;
+                    $registerEnabled = true;
+                }
+                else
+                    $this->addFlash('warning', 'Désistement échoué');
             }
 
             $cancelForm->handleRequest($request);
@@ -93,10 +118,13 @@ class MeetupController extends AbstractController
                     'meetup' => $meetup,
 
                     'registerFormView' => $registerForm->createView(),
+                    'desistFormView' => $desistForm->createView(),
                     'cancelFormView' => $cancelForm->createView(),
 
-                    'registrationEnabled' => $registrationEnabled,
+                    'registerEnabled' => $registerEnabled,
                     'cancelEnabled' => $cancelEnabled,
+                    'desistEnabled' => $desistEnabled,
+
                     'cancelAlert' => $cancelAlert
                 ]
             );
