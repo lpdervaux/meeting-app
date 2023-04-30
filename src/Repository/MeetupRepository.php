@@ -54,11 +54,11 @@ class MeetupRepository extends ServiceEntityRepository
                     campus,
                     attendees
                 FROM App\Entity\Meetup meetup
-                    JOIN meetup.location location
-                        JOIN location.city city
-                    JOIN meetup.coordinator coordinator
-                    JOIN meetup.campus campus
-                    JOIN meetup.attendees attendees
+                    LEFT JOIN meetup.location location
+                        LEFT JOIN location.city city
+                    LEFT JOIN meetup.coordinator coordinator
+                    LEFT JOIN meetup.campus campus
+                    LEFT JOIN meetup.attendees attendees
                 WHERE meetup.id = :id
                 DQL
             )
