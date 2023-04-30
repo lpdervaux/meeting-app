@@ -86,45 +86,46 @@
         </div>
     </div>
 
+    {% form_theme detailsFormView.userRegister with [ 'form_div_layout.html.twig' ] only %}
+    {% form_theme detailsFormView.userCancel with [ 'form_div_layout.html.twig' ] only %}
+    {% form_theme detailsFormView.cancel with [ 'form_div_layout.html.twig' ] only %}
+
     <div class="d-flex flex-row justify-content-evenly mb-4">
-        {% if registerEnabled %}
-        <button class="btn btn-primary" form="register" type="submit">S'inscrire</button>
+        {% if userRegistrable %}
+            {{ form_widget(
+                detailsFormView.userRegister,
+                { 'attr' : { 'class' : 'btn btn-primary' } }
+            ) }}
         {% endif %}
-        {% if desistEnabled %}
-        <button class="btn btn-primary" form="desist" type="submit">Se désister</button>
+        {% if userCancellable %}
+            {{ form_widget(
+                detailsFormView.userCancel,
+                { 'attr' : { 'class' : 'btn btn-primary' } }
+            ) }}
         {% endif %}
-        {% if cancelEnabled %}
-        <buttton class="btn btn-outline-primary"
-                 type="button"
-                 data-bs-toggle="collapse"
-                 data-bs-target="#cancelCollapse">Annuler</buttton>
+        {% if cancellable %}
+            <buttton class="btn btn-outline-primary"
+                     type="button"
+                     data-bs-toggle="collapse"
+                     data-bs-target="#cancelCollapse">Annuler</buttton>
         {% endif %}
     </div>
 
-    {% if registerEnabled %}
-        {{ form (
-            registerFormView,
-            { 'attr' : { 'id' : 'register' } }
-        ) }}
-    {% endif %}
-
-    {% if desistEnabled %}
-        {{ form (
-            desistFormView,
-            { 'attr' : { 'id' : 'desist' } }
-        ) }}
-    {% endif %}
-
-    {% if cancelEnabled %}
-    <div id="cancelCollapse" class="collapse">
-        {{ form_start(cancelFormView) }}
-            {{ form_row(cancelFormView.cancellationReason) }}
+    {{ form_start(detailsFormView) }}
+        {% if cancellable %}
+        <div id="cancelCollapse" class="collapse">
+            {{ form_row(detailsFormView.cancellationReason) }}
             <div class="d-flex justify-content-center">
-                <button class="btn btn-danger">Annuler</button>
+                {{ form_widget(
+                    detailsFormView.cancel,
+                    { 'attr' : { 'class' : 'btn btn-danger' } }
+                ) }}
             </div>
-        {{ form_end(cancelFormView) }}
-    </div>
-    {% endif %}
+        </div>
+        {% endif %}
+        {{ form_row(detailsFormView._token) }}
+    {{ form_end(detailsFormView, { 'render_rest' : false }) }}
+
 </article>
 {% endblock %}
 

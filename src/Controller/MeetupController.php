@@ -7,16 +7,13 @@ namespace App\Controller;
 use App\Entity\Meetup;
 use App\Entity\MeetupStatus;
 use App\Entity\User;
-use App\Form\MeetupDesistType;
-use App\Form\MeetupCancelType;
-use App\Form\MeetupRegisterType;
 use App\Form\MeetupType;
+use App\Form\MeetupDetailsType;
 use App\Repository\MeetupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/meetup', name: 'app_meetup')]
@@ -56,93 +53,92 @@ class MeetupController extends AbstractController
                 ->getAttendees()
                 ->contains($user);
 
-            $registerEnabled =
+            $userRegistrable =
                 ( $status === MeetupStatus::Open )
                 && ( ! $attending )
                 && ( $meetup->getAttendees()->count() < $meetup->getCapacity() );
-            $desistEnabled =
+            $userCancellable =
                 ( $status === MeetupStatus::Open )
                 && ( $attending );
-            $cancelEnabled =
+            $cancellable =
                 ( ! $meetup->isCancelled() )
                 && (
                     $user === $meetup->getCoordinator()
                     || $this->isGranted('ROLE_ADMINISTRATOR')
                 );
 
-            $cancelAlert =
-                ( $meetup->isCancelled() )
-                && ( $now < $meetup->getEnd() );
+            $detailsForm = $this->createForm(
+                MeetupDetailsType::class,
+                $meetup,
+                [
+                    'attr' => [ 'id' => 'detailsForm' ],
+                    'form_attr' => 'detailsForm'
+                ]
+            );
 
-            $registerForm = $this->createForm(MeetupRegisterType::class);
-            $desistForm = $this->createForm(MeetupDesistType::class);
-            $cancelForm = $this->createForm(MeetupCancelType::class);
-
-            $registerForm->handleRequest($request);
-            if ( $registerForm->isSubmitted() && $registerForm->isValid() )
+            $detailsForm->handleRequest($request);
+            if ( $detailsForm->isSubmitted() )
             {
-                if ( $registerEnabled )
-                {
+                if (
+                    $detailsForm
+                        ->get('userRegister')
+                        ->isClicked()
+                    && $userRegistrable
+                ) {
                     $meetup->addAttendee($user);
                     $entityManager->persist($meetup);
                     $entityManager->flush();
 
                     $this->addFlash('success', 'Inscription réussie');
-
-                    $registerEnabled = false;
-                    $desistEnabled = true;
+                    $userRegistrable = false;
+                    $userCancellable = true;
                 }
-                else
-                    $this->addFlash('warning', 'Inscription échouée');
-            }
-
-            $desistForm->handleRequest($request);
-            if ( $desistForm->isSubmitted() && $desistForm->isValid() )
-            {
-                if ( $desistEnabled )
-                {
+                else if (
+                    $detailsForm
+                        ->get('userCancel')
+                        ->isClicked()
+                    && $userCancellable
+                ) {
                     $meetup->removeAttendee($user);
                     $entityManager->persist($meetup);
                     $entityManager->flush();
 
                     $this->addFlash('success', 'Désistement réussi');
-
-                    $desistEnabled = false;
-                    $registerEnabled = true;
+                    $userCancellable = false;
+                    $userRegistrable = true;
                 }
-                else
-                    $this->addFlash('warning', 'Désistement échoué');
-            }
-
-            $cancelForm->handleRequest($request);
-            if ( $cancelForm->isSubmitted() && $cancelForm->isValid() )
-            {
-                if ( $cancelEnabled )
-                {
+                else if (
+                    $detailsForm
+                        ->get('cancel')
+                        ->isClicked()
+                    && $cancellable
+                    && $detailsForm->isValid()
+                ) {
                     $meetup->setCancelled(true);
                     $meetup->setCancellationDate(new \DateTimeImmutable());
-                    $meetup->setCancellationReason($cancelForm->getData()['cancellationReason']);
                     $entityManager->persist($meetup);
                     $entityManager->flush($meetup);
 
-                    $cancelEnabled = false;
+                    $this->addFlash('success', 'Sortie annulée');
+                    $cancellable = false;
                 }
             }
+
+            $cancelAlert =
+                ( $meetup->isCancelled() )
+                && ( $now < $meetup->getEnd() );
 
             $response = $this->render(
                 'meetup/details.html.twig',
                 [
                     'meetup' => $meetup,
+                    'detailsFormView' => $detailsForm->createView(),
 
-                    'registerFormView' => $registerForm->createView(),
-                    'desistFormView' => $desistForm->createView(),
-                    'cancelFormView' => $cancelForm->createView(),
+                    'userRegistrable' => $userRegistrable,
+                    'userCancellable' => $userCancellable,
+                    'cancellable' => $cancellable,
 
-                    'registerEnabled' => $registerEnabled,
-                    'cancelEnabled' => $cancelEnabled,
-                    'desistEnabled' => $desistEnabled,
-
-                    'cancelAlert' => $cancelAlert
+                    'cancelAlert' => $cancelAlert,
                 ]
             );
         }
