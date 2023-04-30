@@ -42,7 +42,7 @@ class MeetupController extends AbstractController
 
         $registrationEnabled = $meetup->canRegister($user);
         $cancelEnabled = ( ! $meetup->isCancelled() )
-            && ( $user === $meetup->getCoordinator() );
+            && ( $user === $meetup->getCoordinator() || $this->isGranted('ROLE_ADMINISTRATOR') );
         $now = new \DateTimeImmutable();
         $cancelAlert = ( $meetup->isCancelled() )
             && ( $now < $meetup->getEnd() );
