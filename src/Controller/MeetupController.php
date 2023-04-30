@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class MeetupController extends AbstractController
 {
     #[Route(
-        '/{id}/details',
+        '/{id}',
         name: '_details',
         requirements: [ 'id' => '^\d+$' ]
     )]
@@ -33,6 +33,8 @@ class MeetupController extends AbstractController
         EntityManagerInterface $entityManager
     ) : Response
     {
+        $now = new \DateTimeImmutable();
+
         $meetup = $meetupRepository->findDetails($id);
         if ( ! $meetup )
             throw $this->createNotFoundException();
@@ -40,61 +42,67 @@ class MeetupController extends AbstractController
         if ( ! $user instanceof User )
             throw $this->createAccessDeniedException();
 
-        $registrationEnabled = $meetup->canRegister($user);
-        $cancelEnabled = ( ! $meetup->isCancelled() )
-            && ( $user === $meetup->getCoordinator() || $this->isGranted('ROLE_ADMINISTRATOR') );
-        $now = new \DateTimeImmutable();
-        $cancelAlert = ( $meetup->isCancelled() )
-            && ( $now < $meetup->getEnd() );
-
-        $registerForm = $this->createForm(MeetupRegisterUserType::class);
-        $cancelForm = $this->createForm(MeetupCancelType::class);
-
-        $registerForm->handleRequest($request);
-        if ( $registerForm->isSubmitted() && $registerForm->isValid() )
+        if ( $now > $meetup->getEnd()->add(new \DateInterval('P1M')) )
+            $response = $this->render('meetup/archived.html.twig');
+        else
         {
-            if ( $registrationEnabled )
+            $registrationEnabled = $meetup->canRegister($user);
+            $cancelEnabled = ( ! $meetup->isCancelled() )
+                && ( $user === $meetup->getCoordinator() || $this->isGranted('ROLE_ADMINISTRATOR') );
+            $cancelAlert = ( $meetup->isCancelled() )
+                && ( $now < $meetup->getEnd() );
+
+            $registerForm = $this->createForm(MeetupRegisterUserType::class);
+            $cancelForm = $this->createForm(MeetupCancelType::class);
+
+            $registerForm->handleRequest($request);
+            if ( $registerForm->isSubmitted() && $registerForm->isValid() )
             {
-                $meetup->addAttendee($user);
-                $entityManager->persist($meetup);
-                $entityManager->flush();
+                if ( $registrationEnabled )
+                {
+                    $meetup->addAttendee($user);
+                    $entityManager->persist($meetup);
+                    $entityManager->flush();
 
-                $this->addFlash('success', 'Inscription réussie');
+                    $this->addFlash('success', 'Inscription réussie');
 
-                $registrationEnabled = false;
+                    $registrationEnabled = false;
+                }
+                else
+                    $this->addFlash('warning', 'Inscription échouée');
             }
-            else
-                $this->addFlash('warning', 'Inscription échouée');
+
+            $cancelForm->handleRequest($request);
+            if ( $cancelForm->isSubmitted() && $cancelForm->isValid() )
+            {
+                if ( $cancelEnabled )
+                {
+                    $meetup->setCancelled(true);
+                    $meetup->setCancellationDate(new \DateTimeImmutable());
+                    $meetup->setCancellationReason($cancelForm->getData()['cancellationReason']);
+                    $entityManager->persist($meetup);
+                    $entityManager->flush($meetup);
+
+                    $cancelEnabled = false;
+                }
+            }
+
+            $response = $this->render(
+                'meetup/details.html.twig',
+                [
+                    'meetup' => $meetup,
+
+                    'registerFormView' => $registerForm->createView(),
+                    'cancelFormView' => $cancelForm->createView(),
+
+                    'registrationEnabled' => $registrationEnabled,
+                    'cancelEnabled' => $cancelEnabled,
+                    'cancelAlert' => $cancelAlert
+                ]
+            );
         }
 
-        $cancelForm->handleRequest($request);
-        if ( $cancelForm->isSubmitted() && $cancelForm->isValid() )
-        {
-            if ( $cancelEnabled )
-            {
-                $meetup->setCancelled(true);
-                $meetup->setCancellationDate(new \DateTimeImmutable());
-                $meetup->setCancellationReason($cancelForm->getData()['cancellationReason']);
-                $entityManager->persist($meetup);
-                $entityManager->flush($meetup);
-
-                $cancelEnabled = false;
-            }
-        }
-
-        return $this->render(
-            'meetup/details.html.twig',
-            [
-                'meetup' => $meetup,
-
-                'registerFormView' => $registerForm->createView(),
-                'cancelFormView' => $cancelForm->createView(),
-
-                'registrationEnabled' => $registrationEnabled,
-                'cancelEnabled' => $cancelEnabled,
-                'cancelAlert' => $cancelAlert
-            ]
-        );
+        return $response;
     }
 
     #[Route('/new', name: '_new')]
