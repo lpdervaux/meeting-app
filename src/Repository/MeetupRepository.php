@@ -41,6 +41,31 @@ class MeetupRepository extends ServiceEntityRepository
         }
     }
 
+    public function findDetails (int $id) : ?Meetup
+    {
+        return $this
+            ->getEntityManager()
+            ->createQuery(
+                <<<DQL
+                SELECT meetup,
+                    location,
+                    city,
+                    coordinator,
+                    campus,
+                    attendees
+                FROM App\Entity\Meetup meetup
+                    JOIN meetup.location location
+                        JOIN location.city city
+                    JOIN meetup.coordinator coordinator
+                    JOIN meetup.campus campus
+                    JOIN meetup.attendees attendees
+                WHERE meetup.id = :id
+                DQL
+            )
+            ->setParameter('id', $id)
+            ->getOneOrNullResult();
+    }
+
 //    /**
 //     * @return Meetup[] Returns an array of Meetup objects
 //     */
