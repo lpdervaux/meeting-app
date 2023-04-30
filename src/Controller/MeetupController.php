@@ -43,16 +43,35 @@ class MeetupController extends AbstractController
         if ( ! $user instanceof User )
             throw $this->createAccessDeniedException();
 
-        if ( $now > $meetup->getEnd()->add(new \DateInterval('P1M')) )
+        $oneMonthFromEnd = $meetup
+            ->getEnd()
+            ->add(new \DateInterval('P1M'));
+
+        if ( $now > $oneMonthFromEnd )
             $response = $this->render('meetup/archived.html.twig');
         else
         {
-            $registerEnabled = $meetup->canRegister($user);
-            $desistEnabled = $meetup->getAttendees()->contains($user);
-            $cancelEnabled = ( ! $meetup->isCancelled() )
-                && ( $user === $meetup->getCoordinator() || $this->isGranted('ROLE_ADMINISTRATOR') );
+            $status = $meetup->getStatus($now);
+            $attending = $meetup
+                ->getAttendees()
+                ->contains($user);
 
-            $cancelAlert = ( $meetup->isCancelled() )
+            $registerEnabled =
+                ( $status === MeetupStatus::Open )
+                && ( ! $attending )
+                && ( $meetup->getAttendees()->count() < $meetup->getCapacity() );
+            $desistEnabled =
+                ( $status === MeetupStatus::Open )
+                && ( $attending );
+            $cancelEnabled =
+                ( ! $meetup->isCancelled() )
+                && (
+                    $user === $meetup->getCoordinator()
+                    || $this->isGranted('ROLE_ADMINISTRATOR')
+                );
+
+            $cancelAlert =
+                ( $meetup->isCancelled() )
                 && ( $now < $meetup->getEnd() );
 
             $registerForm = $this->createForm(MeetupRegisterType::class);
@@ -62,7 +81,6 @@ class MeetupController extends AbstractController
             $registerForm->handleRequest($request);
             if ( $registerForm->isSubmitted() && $registerForm->isValid() )
             {
-                dump($registerForm->isSubmitted());
                 if ( $registerEnabled )
                 {
                     $meetup->addAttendee($user);
@@ -81,7 +99,6 @@ class MeetupController extends AbstractController
             $desistForm->handleRequest($request);
             if ( $desistForm->isSubmitted() && $desistForm->isValid() )
             {
-                dump($desistForm->isSubmitted());
                 if ( $desistEnabled )
                 {
                     $meetup->removeAttendee($user);
