@@ -155,6 +155,7 @@ class MeetupController extends AbstractController
             throw $this->createAccessDeniedException();
 
         $meetup = new Meetup();
+        $meetup->setCapacity(5);
         $meetup->setCoordinator($user);
         $meetup->addAttendee($user);
         $meetup->setCancelled(false);

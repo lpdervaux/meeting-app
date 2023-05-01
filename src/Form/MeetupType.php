@@ -7,8 +7,10 @@ namespace App\Form;
 use App\Entity\Meetup;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Range;
 
 class MeetupType extends AbstractType
 {
@@ -17,7 +19,13 @@ class MeetupType extends AbstractType
         $builder
             ->add('name', options: [ 'label' => 'Nom'])
             ->add('description', options: [ 'label' => 'Description'])
-            ->add('capacity', options: [ 'label' => 'Capacité'])
+            ->add('capacity',
+                IntegerType::class,
+                [
+                    'label' => 'Capacité',
+                    'attr' => [ 'min' => 5, 'max' => 50 ]
+                ]
+            )
             ->add(
                 'campus',
                 EntityType::class,

@@ -30,7 +30,7 @@ class Meetup
 
     #[ORM\Column(options: ['unsigned' => true])]
     #[Assert\NotNull]
-    #[Assert\Positive]
+    #[Assert\Range(min: 5, max: 50)]
     private ?int $capacity = null;
 
     #[ORM\ManyToOne]
