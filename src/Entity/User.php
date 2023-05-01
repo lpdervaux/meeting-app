@@ -17,6 +17,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity(fields: [ 'email', 'nickname' ])]
 #[Vich\Uploadable]
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
