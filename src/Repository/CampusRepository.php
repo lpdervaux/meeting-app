@@ -41,19 +41,29 @@ class CampusRepository extends ServiceEntityRepository
         }
     }
 
-    public function findWithMinId()
+    public function findByName($name=null) : array
     {
-        $qb = $this->createQueryBuilder('campus')
-            ->select('MIN(campus.name)');
-        $query = $qb->getQuery();
-        $minId = $query->getResult();
+        $campusAndNo = array();
 
         $qb = $this->createQueryBuilder('campus')
-            ->where('campus.name = \''. $minId[0][1].'\'');
+            ->select('campus');
         $query = $qb->getQuery();
+        $campusList = $query->getResult();
 
-        return $query->getResult();
+        foreach($campusList as $key => $value)
+        {
+            if($value->getName() == $name)
+            {
+                $campusAndNo['campus'] = $value;
+                $campusAndNo['no'] = $key;
+            }
+        }
+        return $campusAndNo;
+
+       // return $query->getResult()[0];
     }
+
+
 
 //    /**
 //     * @return Campus[] Returns an array of Campus objects
