@@ -62,6 +62,7 @@ class MeetupController extends AbstractController
                 && ( $attending );
             $cancellable =
                 ( ! $meetup->isCancelled() )
+                && ( $now < $meetup->getStart() )
                 && (
                     $user === $meetup->getCoordinator()
                     || $this->isGranted('ROLE_ADMINISTRATOR')
