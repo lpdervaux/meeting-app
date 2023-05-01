@@ -7,6 +7,7 @@ namespace App\Form;
 use App\Entity\Meetup;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateIntervalType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,8 +23,8 @@ class MeetupType extends AbstractType
             ->add('capacity',
                 IntegerType::class,
                 [
-                    'label' => 'Capacité',
-                    'attr' => [ 'min' => 5, 'max' => 50 ]
+                    'attr' => [ 'min' => 5, 'max' => 50 ],
+                    'label' => 'Capacité'
                 ]
             )
             ->add(
@@ -66,10 +67,13 @@ class MeetupType extends AbstractType
                 ]
             )
             ->add(
-                'end',
-                options: [
-                    'widget' => 'single_text',
-                    'label' => 'Fin de sortie'
+                'duration',
+                IntegerType::class,
+                [
+                    'attr' => [ 'min' => 1, 'max' => 12 ],
+                    'getter' => fn (Meetup $meetup) : int => MeetupType::getDurationFromMeetup($meetup) ?? 1,
+                    'setter' => fn (Meetup $meetup, int $value) => MeetupType::setEndFromDuration($meetup, $value),
+                    'label' => 'Durée (heures)'
                 ]
             )
         ;
@@ -80,5 +84,28 @@ class MeetupType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Meetup::class,
         ]);
+    }
+
+    static private function getDurationFromMeetup (Meetup $meetup) : ?int
+    {
+        if ( ! $meetup->getStart() || ! $meetup->getEnd() )
+            $duration = null;
+        else
+            $duration = $meetup
+                ->getStart()
+                ->diff($meetup->getEnd())
+                ->h;
+
+        return $duration;
+    }
+
+    static private function setEndFromDuration (Meetup $meetup, int $duration) : void
+    {
+        if ( $meetup->getStart() )
+        {
+            $meetup->setEnd(
+                $meetup->getStart()->add(new \DateInterval('PT' . $duration . 'H'))
+            );
+        }
     }
 }
