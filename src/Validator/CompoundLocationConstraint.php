@@ -6,8 +6,4 @@ namespace App\Validator;
 
 use Symfony\Component\Validator\Constraint;
 
-#[\Attribute]
-class CompoundLocationConstraint extends Constraint
-{
-    public string $message = "Invalid location";
-}
+class CompoundLocationConstraint extends Constraint {}
