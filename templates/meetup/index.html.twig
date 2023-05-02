@@ -94,7 +94,7 @@
                 {% endif %}
                 <td>{{ meetup.coordinator.name}}</td>
                 <td>
-                    <a href="">Afficher</a>
+                    <a href="{{ path("app_meetup_details", {'id': meetup.id}) }}">Afficher</a>
                     {% if registered == 'false' and meetup.status.name == 'Open'%}
                         <a href="">S'inscrire</a>
                     {% endif %}

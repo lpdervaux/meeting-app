@@ -28,9 +28,10 @@ use Symfony\Component\Validator\Constraints\When;
 
 define('DEFAULT_CAMPUS', 'Navarro');
 
+#[Route('/meetup', name : 'app_meetup')]
 class MeetupController extends AbstractController
 {
-    #[Route('/meetup', name: 'app_meetup_list')]
+    #[Route('/meetup', name: '_list')]
     public function list(Request $request, MeetupRepository $meetupRepository, CampusRepository $campusRepository): Response
     {
         $session = $request->getSession();
