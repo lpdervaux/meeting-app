@@ -92,7 +92,7 @@
                 {% if registered == 'false' %}
                     <td>&#10007;</td>
                 {% endif %}
-                <td>{{ meetup.coordinator.name}}</td>
+                <td><a href="{{ path("app_user_profile", {'id': meetup.coordinator.id}) }}">{{ meetup.coordinator.name}}</a></td>
                 <td>
                     <a href="{{ path("app_meetup_details", {'id': meetup.id}) }}">Afficher</a>
                     {% if registered == 'false' and meetup.status.name == 'Open'%}
