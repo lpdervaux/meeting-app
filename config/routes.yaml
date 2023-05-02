@@ -3,3 +3,10 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+home:
+    path: /
+    controller: App\Controller\MeetupController::list
+
+app_home:
+    alias: app_meetup_list
