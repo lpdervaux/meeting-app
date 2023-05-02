@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\Campus;
 use App\Repository\CampusRepository;
 use App\Repository\MeetupRepository;
+use App\Service\MeetupCancellationService;
 use App\Service\MeetupRegistrationService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -246,8 +247,8 @@ class MeetupController extends AbstractController
         int $id,
         Request $request,
         MeetupRepository $meetupRepository,
-        EntityManagerInterface $entityManager,
-        MeetupRegistrationService $registrationService
+        MeetupRegistrationService $registrationService,
+        MeetupCancellationService $cancellationService
     ) : Response
     {
         $now = new \DateTimeImmutable();
@@ -267,17 +268,12 @@ class MeetupController extends AbstractController
             $response = $this->render('meetup/archived.html.twig');
         else
         {
-            $cancellable =
-                ( ! $meetup->isCancelled() )
-                && ( $now < $meetup->getStart() )
-                && ( $this->isGranted('cancel', $meetup) );
-
             $detailsForm = $this->createForm(
                 MeetupDetailsType::class,
                 $meetup,
                 [
-                    'attr' => [ 'id' => 'detailsForm' ],
-                    'form_attr' => 'detailsForm'
+                    'attr' => [ 'id' => 'details_form' ],
+                    'form_attr' => 'details_form'
                 ]
             );
 
@@ -303,27 +299,23 @@ class MeetupController extends AbstractController
                         $this->addFlash('warning', 'Désistement échoué');
                 }
                 else if (
-                    $detailsForm
-                        ->get('cancel')
-                        ->isClicked()
-                    && $cancellable
+                    $detailsForm->get('cancel')->isClicked()
                     && $detailsForm->isValid()
                 ) {
-                    $meetup->setCancelled(true);
-                    $meetup->setCancellationDate(new \DateTimeImmutable());
-                    $entityManager->persist($meetup);
-                    $entityManager->flush($meetup);
+                    $success = $cancellationService->cancel($meetup);
 
-                    $this->addFlash('success', 'Sortie annulée');
-                    $cancellable = false;
+                    if ( $success )
+                        $this->addFlash('success', 'Annulation réussie');
+                    else
+                        $this->addFlash('warning', 'Annulation échouée');
                 }
             }
 
             $userRegistrable = $meetup->canRegister($user);
             $userCancellable = $meetup->canCancel($user);
+            $cancellable = $cancellationService->isCancellable($meetup);
 
-            $cancelAlert =
-                ( $meetup->isCancelled() )
+            $cancelAlert = ( $meetup->isCancelled() )
                 && ( $now < $meetup->getEnd() );
 
             $response = $this->render(
