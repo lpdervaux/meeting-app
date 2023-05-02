@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -16,7 +17,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @extends ServiceEntityRepository<User>
  *
- * @method User|null find($id, $lockMode = null, $lockVersion = null)
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
@@ -28,6 +28,40 @@ class UserRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
+    }
+
+    /**
+     * Join on roles by default.
+     */
+    public function find (mixed $id, mixed $lockMode = null, mixed $lockVersion = null) : ?User
+    {
+        if ( ! $lockVersion )
+            $dql = <<<DQL
+                SELECT user, roles
+                FROM App\Entity\User user
+                    LEFT JOIN user.roles roles
+                WHERE user.id = :id
+                DQL;
+        else
+            $dql =<<<DQL
+                SELECT user, roles
+                FROM App\Entity\User user
+                    LEFT JOIN user.roles roles
+                WHERE user.id = :id
+                    AND user.lockVersion = :lockVersion
+                DQL;
+
+        $query = $this
+            ->getEntityManager()
+            ->createQuery($dql)
+            ->setParameter('id', $id);
+
+        if ( $lockVersion )
+            $query->setParameter('lockVersion', $lockVersion);
+        if ( $lockMode )
+            $query->setLockMode($lockMode);
+
+        return $query->getOneOrNullResult();
     }
 
     public function save(User $entity, bool $flush = false): void
@@ -78,29 +112,4 @@ class UserRepository
             ->setParameter('identifier', $identifier)
             ->getOneOrNullResult();
     }
-
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }
