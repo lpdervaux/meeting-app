@@ -3,116 +3,116 @@
 {% block title %}Hello MeetupController!{% endblock %}
 
 {% block body %}
-    <div class="">
-    <div>
-        {{ form_start(form)}}
-    </div>
-    <div class="row mb-5">
-    <div class="col-md-4 px-5">
-        <div class="row mb-4">
-            <div class="col-md-6 mt-auto mb-auto">
-                {{ form_label(form.campus) }}
+    <div class="" style="overflow-x: hidden ">
+        <div>
+            {{ form_start(form)}}
+        </div>
+        <div class="row mb-5">
+            <div class="col-md-4 px-5">
+                <div class="row mb-4">
+                    <div class="col-md-6 mt-auto mb-auto">
+                        {{ form_label(form.campus) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_widget(form.campus, {'attr': {'class':'form-select'}}) }}
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6 mt-auto mb-auto">
+                        {{ form_label(form.research) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_widget(form.research,{'attr': {'class':'form-control'}}) }}
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6">
-                {{ form_widget(form.campus, {'attr': {'class':'form-select'}}) }}
+            <div class="col-md-4 px-5 mb-2">
+                <div class="col mb-1">
+                    {{ form_widget(form.coordinator, {'attr': {'class':'form-check-input'}}) }}
+                    {{ form_label(form.coordinator) }}
+                </div>
+                <div class="col mb-1">
+                    {{ form_widget(form.registered, {'attr': {'class':'form-check-input'}}) }}
+                    {{ form_label(form.registered) }}
+                </div>
+                <div class="col mb-1">
+                    {{ form_widget(form.no_registered, {'attr': {'class':'form-check-input'}}) }}
+                    {{ form_label(form.no_registered) }}
+                </div>
+                <div class="col mb-1">
+                    {{ form_widget(form.past, {'attr': {'class':'form-check-input'}}) }}
+                    {{ form_label(form.past) }}
+                </div>
+            </div>
+            <div class="col-md-4 px-5">
+                <div class="row mb-4">
+                    <div class="col-md-2 mt-auto mb-auto">
+                        {{ form_label(form.start) }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_widget(form.start, {'attr': {'class':'form-control'}}) }}
+                    </div>
+                    <div class="col-md-2 mt-auto mb-auto">
+                        {{ form_label(form.end) }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_widget(form.end, {'attr': {'class':'form-control'}}) }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-lg btn-primary" name="research_button" value="true">Rechercher</button>
             </div>
         </div>
-        <div class="row mb-4">
-            <div class="col-md-6 mt-auto mb-auto">
-                {{ form_label(form.research) }}
-            </div>
-            <div class="col-md-6">
-                {{ form_widget(form.research,{'attr': {'class':'form-control'}}) }}
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 px-5 mb-2">
-        <div class="col mb-1">
-            {{ form_widget(form.coordinator, {'attr': {'class':'form-check-input'}}) }}
-            {{ form_label(form.coordinator) }}
-        </div>
-        <div class="col mb-1">
-            {{ form_widget(form.registered, {'attr': {'class':'form-check-input'}}) }}
-            {{ form_label(form.registered) }}
-        </div>
-        <div class="col mb-1">
-            {{ form_widget(form.no_registered, {'attr': {'class':'form-check-input'}}) }}
-            {{ form_label(form.no_registered) }}
-        </div>
-        <div class="col mb-1">
-            {{ form_widget(form.past, {'attr': {'class':'form-check-input'}}) }}
-            {{ form_label(form.past) }}
-        </div>
-    </div>
-    <div class="col-md-4 px-5">
-        <div class="row mb-4">
-            <div class="col-md-2 mt-auto mb-auto">
-                {{ form_label(form.start) }}
-            </div>
-            <div class="col-md-3">
-                {{ form_widget(form.start, {'attr': {'class':'form-control'}}) }}
-            </div>
-            <div class="col-md-2 mt-auto mb-auto">
-                {{ form_label(form.end) }}
-            </div>
-            <div class="col-md-3">
-                {{ form_widget(form.end, {'attr': {'class':'form-control'}}) }}
-            </div>
-        </div>
-        <button type="submit" class="btn btn-lg btn-primary" name="research_button" value="true">Rechercher</button>
-    </div>
-    </div>
-    <div class="col ms-3 me-3">
-    <table class="table border">
-        <tr>
-            <td>Nom de la sortie</td>
-            <td>Date de la sortie</td>
-            <td>Clôture</td>
-            <td>inscrits/places</td>
-            <td>Etat</td>
-            <td>Inscrit</td>
-            <td>Organisateur</td>
-            <td>Actions</td>
-        </tr>
-        {% if meetup_list | length !=0 and meetup_list!=null %}
-        {% for meetup in meetup_list %}
-            {% set registered = 'false' %}
-            <tr>
-                <td>{{ meetup.name }}</td>
-                <td>{{ meetup.start | date | format_datetime(locale='fr',pattern="dd MMMM Y")|capitalize() }}</td>
-                <td>{{ meetup.registrationEnd | date |format_datetime(locale='fr',pattern="dd MMMM Y")|capitalize() }}</td>
-                <td>{{ meetup.attendees | length }}/{{ meetup.capacity }}</td>
-                <td>{{ meetup.status.value}} </td>
-                {% for ma in meetup.attendees %}
-                    {% if app.user.id == ma.id %}
-                        <td>&#10003;</td>
-                        {% set registered = 'true' %}
-                    {% endif %}
-                {% endfor %}
-                {% if registered == 'false' %}
-                    <td>&#10007;</td>
+        <div class="col ms-3 me-3">
+            <table class="table border">
+                <tr>
+                    <td>Nom de la sortie</td>
+                    <td>Date de la sortie</td>
+                    <td>Clôture</td>
+                    <td>inscrits/places</td>
+                    <td>Etat</td>
+                    <td>Inscrit</td>
+                    <td>Organisateur</td>
+                    <td>Actions</td>
+                </tr>
+                {% if meetup_list | length !=0 and meetup_list!=null %}
+                    {% for meetup in meetup_list %}
+                        {% set registered = 'false' %}
+                            <tr>
+                                <td>{{ meetup.name }}</td>
+                                <td>{{ meetup.start | date | format_datetime(locale='fr',pattern="dd MMMM Y")|capitalize() }}</td>
+                                <td>{{ meetup.registrationEnd | date |format_datetime(locale='fr',pattern="dd MMMM Y")|capitalize() }}</td>
+                                <td>{{ meetup.attendees | length }}/{{ meetup.capacity }}</td>
+                                <td>{{ meetup.status.value}} </td>
+                                {% for ma in meetup.attendees %}
+                                    {% if app.user.id == ma.id %}
+                                        <td>&#10003;</td>
+                                        {% set registered = 'true' %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if registered == 'false' %}
+                                    <td>&#10007;</td>
+                                {% endif %}
+                                <td><a href="{{ path("app_user_profile", {'id': meetup.coordinator.id}) }}">{{ meetup.coordinator.name}}</a></td>
+                                <td>
+                                    <a href="{{ path("app_meetup_details", {'id': meetup.id}) }}">Afficher</a>
+                                    {% if registered == 'false' and meetup.status.name == 'Open'%}
+                                        <a href="">S'inscrire</a>
+                                    {% endif %}
+                                    {% if registered == 'true' and (meetup.status.name == 'Open' or meetup.status.name == 'close') %}
+                                        <a href="">Se désister</a>
+                                    {% endif %}
+                                    {% if (meetup.coordinator == app.user or is_granted('ROLE_ADMINISTRATOR')) and (meetup.status.name == 'Open' or  meetup.status.name=='Scheduled') %}
+                                        <a href="">Modifier</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                     {% endfor %}
                 {% endif %}
-                <td><a href="{{ path("app_user_profile", {'id': meetup.coordinator.id}) }}">{{ meetup.coordinator.name}}</a></td>
-                <td>
-                    <a href="{{ path("app_meetup_details", {'id': meetup.id}) }}">Afficher</a>
-                    {% if registered == 'false' and meetup.status.name == 'Open'%}
-                        <a href="">S'inscrire</a>
-                    {% endif %}
-                    {% if registered == 'true' and (meetup.status.name == 'Open' or meetup.status.name == 'close') %}
-                        <a href="">Se désister</a>
-                    {% endif %}
-                    {% if (meetup.coordinator == app.user or is_granted('ROLE_ADMINISTRATOR')) and (meetup.status.name == 'Open' or  meetup.status.name=='Scheduled') %}
-                        <a href="">Modifier</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        {% endif %}
-    </table>
-    <a href="{{ path('app_meetup_new') }}" class="btn btn-lg btn-primary">Créer une sortie</a>
-    </div>
-    </div>
-    <div>
-        {{ form_end(form) }}
+            </table>
+            <a href="{{ path('app_meetup_new') }}" class="btn btn-lg btn-primary">Créer une sortie</a>
+        </div>
+        <div>
+            {{ form_end(form) }}
+        </div>
     </div>
 {% endblock %}
