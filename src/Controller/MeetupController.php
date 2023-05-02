@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\When;
 
-define('DEFAULT_CAMPUS', 'Navarro');
+
 
 #[Route('/meetup', name : 'app_meetup')]
 class MeetupController extends AbstractController
@@ -34,6 +34,8 @@ class MeetupController extends AbstractController
     #[Route('/meetup', name: '_list')]
     public function list(Request $request, MeetupRepository $meetupRepository, CampusRepository $campusRepository): Response
     {
+        define('DEFAULT_CAMPUS', $campusRepository->findNameByNo(0));
+
         $session = $request->getSession();
         $form = $this->generateForm($campusRepository, $session);
         $form->handleRequest($request);

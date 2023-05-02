@@ -63,6 +63,26 @@ class CampusRepository extends ServiceEntityRepository
        // return $query->getResult()[0];
     }
 
+    public function findNameByNo($no)
+    {
+        $name = null;
+        $qb = $this->createQueryBuilder('campus')
+            ->select('campus');
+        $query = $qb->getQuery();
+        $campusList = $query->getResult();
+
+        foreach($campusList as $key => $value)
+        {
+            if($key == $no)
+            {
+                $name = $value->getName();
+            }
+        }
+
+        return $name;
+
+    }
+
 
 
 //    /**
