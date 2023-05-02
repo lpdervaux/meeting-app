@@ -79,8 +79,8 @@
             {% set registered = 'false' %}
             <tr>
                 <td>{{ meetup.name }}</td>
-                <td>{{ meetup.start | date}}</td>
-                <td>{{ meetup.registrationEnd | date}}</td>
+                <td>{{ meetup.start | date | format_datetime(locale='fr',pattern="dd MMMM Y")|capitalize() }}</td>
+                <td>{{ meetup.registrationEnd | date |format_datetime(locale='fr',pattern="dd MMMM Y")|capitalize() }}</td>
                 <td>{{ meetup.attendees | length }}/{{ meetup.capacity }}</td>
                 <td>{{ meetup.status.value}} </td>
                 {% for ma in meetup.attendees %}
@@ -109,7 +109,7 @@
         {% endfor %}
         {% endif %}
     </table>
-    <button type="submit" class="btn btn-lg btn-primary" name="create_button" value="true">Créer une sortie</button>
+    <a href="{{ path('app_meetup_new') }}" class="btn btn-lg btn-primary">Créer une sortie</a>
     </div>
     </div>
     <div>

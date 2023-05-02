@@ -48,19 +48,12 @@ class MeetupController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            if($request->request->get('create_button'))
-            {
-                return $this-> redirectToRoute('app_meetup_new');
-            }
-            else
-            {
-                $filters = $form->getData();
-                $session->set('filters', $filters);
-                $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
-                dump($meetupList);
+            $filters = $form->getData();
+            $session->set('filters', $filters);
+            $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
 
-                $form = $this->generateForm($campusRepository, $session);
-            }
+            $form = $this->generateForm($campusRepository, $session);
+
         }
         else
         {
