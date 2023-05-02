@@ -12,6 +12,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class UserFixtures
     extends FakerFixtures
@@ -24,11 +25,14 @@ class UserFixtures
     public const ADMINISTRATOR_COUNT = 10;
     public const ADMINISTRATOR_PREFIX = __CLASS__ . 'administrator';
 
+    private readonly AsciiSlugger $asciiSlugger;
+
     public function __construct (
         FakerService $fakerService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
     ) {
         parent::__construct($fakerService);
+        $this->asciiSlugger = new AsciiSlugger();
     }
 
     public function getDependencies () : array
@@ -99,9 +103,9 @@ class UserFixtures
     private function generateUniqueNickname (string $name, string $surname) : string
     {
         $identifier =
-            iconv('UTF-8', 'ASCII//TRANSLIT', mb_strtolower($name))
+            $this->asciiSlugger->slug(mb_strtolower($name))
             . '.'
-            . iconv('UTF-8', 'ASCII//TRANSLIT', mb_strtolower($surname));
+            . $this->asciiSlugger->slug(mb_strtolower($surname));
         $offset = $this->nicknameOffset[$identifier] ?? null;
 
         if ( $offset === null )
