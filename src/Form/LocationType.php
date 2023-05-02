@@ -19,14 +19,19 @@ class LocationType extends AbstractType
             ->add('address', options: [ 'label' => 'Adresse' ])
             ->add('latitude')
             ->add('longitude')
+//            ->add(
+//                'city',
+//                EntityType::class,
+//                [
+//                    'class' => 'App\Entity\City',
+//                    'choice_label' => 'name',
+//                    'label' => 'Ville'
+//                ]
+//            )
             ->add(
                 'city',
-                EntityType::class,
-                [
-                    'class' => 'App\Entity\City',
-                    'choice_label' => 'name',
-                    'label' => 'Ville'
-                ]
+                CompoundCityType::class,
+                [ 'label' => 'Ville' ]
             )
         ;
     }

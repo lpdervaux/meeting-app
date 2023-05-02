@@ -10,14 +10,13 @@
 
 {% block card_body %}
     {{ form_start(newMeetupFormView) }}
+
     {{ form_row(newMeetupFormView.name) }}
     {{ form_row(newMeetupFormView.description) }}
     {{ form_row(newMeetupFormView.capacity) }}
     {{ form_row(newMeetupFormView.campus) }}
 
     {{ form_label(newMeetupFormView.location) }}
-    {{ form_help(newMeetupFormView.location) }}
-    {{ form_errors(newMeetupFormView.location) }}
     <div class="form-control mb-2 pt-3">
         <div class="mb-2">
             <div class="d-flex">
@@ -33,12 +32,38 @@
             {{ form_errors(newMeetupFormView.location.location) }}
         </div>
         <div id="locationCollapse" class="collapse mb-3">
-            {{ form_widget(newMeetupFormView.location.newLocation) }}
-            {{ form_help(newMeetupFormView.location.newLocation) }}
-            {{ form_errors(newMeetupFormView.location.newLocation) }}
+            {{ form_row(newMeetupFormView.location.newLocation.name) }}
+            {{ form_row(newMeetupFormView.location.newLocation.address) }}
+            {{ form_row(newMeetupFormView.location.newLocation.latitude) }}
+            {{ form_row(newMeetupFormView.location.newLocation.longitude) }}
+
+            {{ form_label(newMeetupFormView.location.newLocation.city) }}
+            <div class="form-control mb-2 pt-3">
+                <div class="mb-2">
+                    <div class="d-flex">
+                        <div class="w-100 me-1">
+                            {{ form_widget(newMeetupFormView.location.newLocation.city.city) }}
+                        </div>
+                        <button class="btn btn-outline-primary"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#cityCollapse">Nouvelle</button>
+                    </div>
+                    {{ form_help(newMeetupFormView.location.newLocation.city.city) }}
+                    {{ form_errors(newMeetupFormView.location.newLocation.city.city) }}
+                </div>
+                <div id="cityCollapse" class="collapse mb-3">
+                    {{ form_widget(newMeetupFormView.location.newLocation.city.newCity) }}
+                    {{ form_help(newMeetupFormView.location.newLocation.city.newCity) }}
+                    {{ form_errors(newMeetupFormView.location.newLocation.city.newCity) }}
+                </div>
+            </div>
         </div>
     </div>
+
     {{ form_rest(newMeetupFormView) }}
+
     <button class="form-control btn btn-primary" type="submit">Créer</button>
+
     {{ form_end(newMeetupFormView) }}
 {% endblock %}

@@ -34,7 +34,7 @@ class Location
     #[Assert\Range(min: -180, max: 180)]
     private ?float $longitude = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(cascade: [ 'persist' ])]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?City $city = null;
