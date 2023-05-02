@@ -33,7 +33,7 @@ use Symfony\Component\Validator\Constraints\When;
 #[Route('/meetup', name : 'app_meetup')]
 class MeetupController extends AbstractController
 {
-    #[Route('/meetup', name: '_list')]
+    #[Route('/list', name: '_list')]
     public function list(Request $request, MeetupRepository $meetupRepository, CampusRepository $campusRepository): Response
     {
         $session = $request->getSession();
