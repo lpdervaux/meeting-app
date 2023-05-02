@@ -6,9 +6,11 @@ namespace App\Entity;
 
 use App\Repository\CityRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CityRepository::class)]
+#[UniqueEntity(fields: [ 'name' ])]
 class City
 {
     #[ORM\Id]

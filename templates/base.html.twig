@@ -24,6 +24,14 @@
         {% include 'fragment/navigation.html.twig' %}
     </header>
     <main>
+        {% for type, messages in app.session.flashbag.all() %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} d-flex justify-content-between">
+                    <p class="mb-0">{{ message }}</p>
+                    <button type="button" class="btn-close text-end" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
         {% block body %}{% endblock %}
     </main>
 </body>
