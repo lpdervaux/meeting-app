@@ -74,10 +74,13 @@ class CompoundLocationType
         if ( $locationFormData )
             $viewData = $locationFormData;
         else if (
-            $newLocationFormData->getName()
-            || $newLocationFormData->getAddress()
-            || $newLocationFormData->getLatitude()
-            || $newLocationFormData->getLongitude()
+            $newLocationFormData
+            && (
+                $newLocationFormData->getName()
+                || $newLocationFormData->getAddress()
+                || $newLocationFormData->getLatitude()
+                || $newLocationFormData->getLongitude()
+            )
         )
             $viewData = $newLocationFormData;
         else
