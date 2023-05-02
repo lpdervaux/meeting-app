@@ -14,17 +14,28 @@
     {{ form_row(newMeetupFormView.description) }}
     {{ form_row(newMeetupFormView.capacity) }}
     {{ form_row(newMeetupFormView.campus) }}
-    <div class="form-control mb-2">
-        {{ form_label(newMeetupFormView.location) }}
-        <div class="d-flex mb-2">
-            {{ form_widget(newMeetupFormView.location.location) }}
-            <button class="btn btn-outline-primary"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#locationCollapse">Nouveau</button>
+
+    {{ form_label(newMeetupFormView.location) }}
+    {{ form_help(newMeetupFormView.location) }}
+    {{ form_errors(newMeetupFormView.location) }}
+    <div class="form-control mb-2 pt-3">
+        <div class="mb-2">
+            <div class="d-flex">
+                <div class="w-100 me-1">
+                    {{ form_widget(newMeetupFormView.location.location) }}
+                </div>
+                <button class="btn btn-outline-primary"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#locationCollapse">Nouveau</button>
+            </div>
+            {{ form_help(newMeetupFormView.location.location) }}
+            {{ form_errors(newMeetupFormView.location.location) }}
         </div>
-        <div id="locationCollapse" class="collapse mb-2">
+        <div id="locationCollapse" class="collapse mb-3">
             {{ form_widget(newMeetupFormView.location.newLocation) }}
+            {{ form_help(newMeetupFormView.location.newLocation) }}
+            {{ form_errors(newMeetupFormView.location.newLocation) }}
         </div>
     </div>
     {{ form_rest(newMeetupFormView) }}
