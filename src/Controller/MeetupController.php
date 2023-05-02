@@ -311,8 +311,8 @@ class MeetupController extends AbstractController
                 }
             }
 
-            $userRegistrable = $meetup->canRegister($user);
-            $userCancellable = $meetup->canCancel($user);
+            $userRegistrable = $registrationService->canRegister($meetup, $user);
+            $userCancellable = $registrationService->canCancel($meetup, $user);
             $cancellable = $cancellationService->isCancellable($meetup);
 
             $cancelAlert = ( $meetup->isCancelled() )

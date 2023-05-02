@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Meetup;
+use App\Entity\MeetupStatus;
 use App\Entity\User;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,6 +15,19 @@ readonly class MeetupRegistrationService
     public function __construct (
         private EntityManagerInterface $entityManager
     ) {}
+
+    public function canRegister (Meetup $meetup, User $user) : bool
+    {
+        return ( $meetup->getStatus() === MeetupStatus::Open )
+            && ( ! $meetup->getAttendees()->contains($user) )
+            && ( $meetup->getAttendees()->count() < $meetup->getCapacity() );
+    }
+
+    public function canCancel (Meetup $meetup, User $user) : bool
+    {
+        return ( $meetup->getStatus() === MeetupStatus::Open )
+            && ( $meetup->getAttendees()->contains($user) );
+    }
 
     public function register (Meetup $meetup, User $user) : bool
     {
@@ -39,7 +53,7 @@ readonly class MeetupRegistrationService
 
     private function registerUser (Meetup $meetup, User $user) : bool
     {
-        if ( $meetup->canRegister($user) )
+        if ( $this->canRegister($meetup, $user) )
         {
             $meetup->addAttendee($user);
             $this->entityManager->persist($meetup);
@@ -55,7 +69,7 @@ readonly class MeetupRegistrationService
 
     private function cancelUser (Meetup $meetup, User $user) : bool
     {
-        if ( $meetup->canCancel($user) )
+        if ( $this->canCancel($meetup, $user) )
         {
             $meetup->removeAttendee($user);
             $this->entityManager->persist($meetup);
