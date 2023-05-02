@@ -297,4 +297,17 @@ class Meetup
     {
         return $this->start->diff($this->end, true);
     }
+
+    public function canRegister (User $user) : bool
+    {
+        return ( $this->getStatus() === MeetupStatus::Open )
+            && ( ! $this->getAttendees()->contains($user) )
+            && ( $this->getAttendees()->count() < $this->getCapacity() );
+    }
+
+    public function canCancel (User $user) : bool
+    {
+        return ( $this->getStatus() === MeetupStatus::Open )
+            && ( $this->getAttendees()->contains($user) );
+    }
 }
