@@ -13,6 +13,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\GreaterThan;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\When;
 
 define('DEFAULT_CAMPUS', 'Navarro');
 
@@ -113,7 +116,21 @@ class MeetupController extends AbstractController
                 'data' =>
                     $session->get('filters') == null?
                         null:
-                        $session->get('filters')['start']
+                        $session->get('filters')['start'],
+                'constraints' => [
+                    new When(
+                        [
+                            'expression' =>  'this.getParent()["end"].getData() != null && value == null',
+                            'constraints' => [
+                                new NotBlank(
+                                    [
+                                        'message'=>'Compléter la date de début.'
+                                    ]
+                                ),
+                            ]
+                        ]
+                    )
+                ]
             ])
             ->add('end', DateType::class, [
                 'label' => 'et : ',
@@ -124,7 +141,34 @@ class MeetupController extends AbstractController
                 'data' =>
                     $session->get('filters') == null?
                         null:
-                        $session->get('filters')['end']
+                        $session->get('filters')['end'],
+                'constraints' => [
+                    new When(
+                        [
+                            'expression' =>  'this.getParent()["start"].getData() != null && value == null',
+                            'constraints' => [
+                                new NotBlank(
+                                    [
+                                        'message'=>'Compléter la date de fin.'
+                                    ]
+                                ),
+                            ]
+                        ]
+                    ),
+                    new When(
+                        [
+                            'expression' => 'this.getParent()["start"].getData() != null && value != null',
+                            'constraints' => [
+                                new GreaterThan(
+                                    [
+                                        'propertyPath' => 'parent.all[start].data',
+                                        'message' => 'La date de fin doit être supérieure à la date de début.'
+                                    ]
+                                )
+                            ]
+                        ]
+                    )
+                ]
             ])
             ->add('coordinator', CheckboxType::class, [
                 'label' => 'Sorties dont je suis l\'organisateur/trice : ',
