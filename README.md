@@ -8,7 +8,7 @@ Users include 2 default accounts:
 * `user@example.org`, a regular user account
 * `administrator@example.org`, an administrator account
 
-Every generated account's password is its nickname.
+Every generated account's password is the username part of its email, which is also its username.
 
 ### Meetups
 
