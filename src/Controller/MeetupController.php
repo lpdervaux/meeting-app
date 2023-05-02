@@ -34,9 +34,13 @@ class MeetupController extends AbstractController
     #[Route('/meetup', name: '_list')]
     public function list(Request $request, MeetupRepository $meetupRepository, CampusRepository $campusRepository): Response
     {
-        define('DEFAULT_CAMPUS', $campusRepository->findNameByNo(0));
-
         $session = $request->getSession();
+
+        if($session->get('filters')==null)
+        {
+            define('DEFAULT_CAMPUS', $campusRepository->findNameByNo(0));
+        }
+
         $form = $this->generateForm($campusRepository, $session);
         $form->handleRequest($request);
 
