@@ -9,10 +9,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 // TODO: class validator for cancelled state
 #[ORM\Entity(repositoryClass: MeetupRepository::class)]
+#[UniqueEntity(fields: [ 'name' ])]
 class Meetup
 {
     #[ORM\Id]
@@ -30,7 +32,7 @@ class Meetup
 
     #[ORM\Column(options: ['unsigned' => true])]
     #[Assert\NotNull]
-    #[Assert\Positive]
+    #[Assert\Range(min: 5, max: 50)]
     private ?int $capacity = null;
 
     #[ORM\ManyToOne]
@@ -67,7 +69,7 @@ class Meetup
     #[Assert\GreaterThan(propertyPath: 'start')]
     private ?\DateTimeImmutable $end = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: [ 'default' => false ])]
     #[Assert\NotNull]
     private ?bool $cancelled = null;
 

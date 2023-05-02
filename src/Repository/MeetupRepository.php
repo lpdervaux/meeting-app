@@ -43,6 +43,7 @@ class MeetupRepository extends ServiceEntityRepository
         }
     }
 
+
     public function findWithFilters($filters, $user)
     {
         define(
@@ -77,19 +78,17 @@ class MeetupRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('meetup')
             ->innerJoin('meetup.coordinator', 'coordinator')
             ->addSelect('coordinator')
-            ->leftJoin('meetup.attendees','attendee')
+            ->leftJoin('meetup.attendees', 'attendee')
             ->addSelect('attendee')
             ->innerJoin('meetup.campus', 'campus')
             ->addSelect('campus');
 
-        if ($filters['campus'])
-        {
+        if ($filters['campus']) {
             $qb->where(CAMPUS_CONDITION)
                 ->setParameter('campus', $filters['campus']);
         }
 
-        if ($filters['research'])
-        {
+        if ($filters['research']) {
             $qb->andWhere(RESEARCH_CONDITION)
                 ->setParameter('research', "%{$filters['research']}%");
         }
@@ -104,8 +103,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']   &&
-            $filters['registered']    &&
+            $filters['coordinator'] &&
+            $filters['registered'] &&
             $filters['no_registered'] &&
             $filters['past']
         ) {
@@ -120,8 +119,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']   &&
-            $filters['registered']    &&
+            $filters['coordinator'] &&
+            $filters['registered'] &&
             $filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -135,8 +134,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']    &&
-            $filters['registered']     &&
+            $filters['coordinator'] &&
+            $filters['registered'] &&
             !$filters['no_registered'] &&
             $filters['past']
         ) {
@@ -150,8 +149,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']   &&
-            !$filters['registered']   &&
+            $filters['coordinator'] &&
+            !$filters['registered'] &&
             $filters['no_registered'] &&
             $filters['past']
         ) {
@@ -165,8 +164,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']  &&
-            $filters['registered']    &&
+            !$filters['coordinator'] &&
+            $filters['registered'] &&
             $filters['no_registered'] &&
             $filters['past']
         ) {
@@ -180,8 +179,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']    &&
-            $filters['registered']     &&
+            $filters['coordinator'] &&
+            $filters['registered'] &&
             !$filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -194,8 +193,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']    &&
-            !$filters['registered']    &&
+            $filters['coordinator'] &&
+            !$filters['registered'] &&
             !$filters['no_registered'] &&
             $filters['past']
         ) {
@@ -208,8 +207,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']  &&
-            !$filters['registered']   &&
+            !$filters['coordinator'] &&
+            !$filters['registered'] &&
             $filters['no_registered'] &&
             $filters['past']
         ) {
@@ -222,8 +221,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']  &&
-            $filters['registered']    &&
+            !$filters['coordinator'] &&
+            $filters['registered'] &&
             $filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -236,8 +235,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']   &&
-            $filters['registered']     &&
+            !$filters['coordinator'] &&
+            $filters['registered'] &&
             !$filters['no_registered'] &&
             $filters['past']
         ) {
@@ -250,8 +249,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']   &&
-            !$filters['registered']   &&
+            $filters['coordinator'] &&
+            !$filters['registered'] &&
             $filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -264,8 +263,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']    &&
-            !$filters['registered']    &&
+            $filters['coordinator'] &&
+            !$filters['registered'] &&
             !$filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -273,8 +272,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']   &&
-            $filters['registered']     &&
+            !$filters['coordinator'] &&
+            $filters['registered'] &&
             !$filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -282,8 +281,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']  &&
-            !$filters['registered']   &&
+            !$filters['coordinator'] &&
+            !$filters['registered'] &&
             $filters['no_registered'] &&
             !$filters['past']
         ) {
@@ -291,8 +290,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            !$filters['coordinator']   &&
-            !$filters['registered']    &&
+            !$filters['coordinator'] &&
+            !$filters['registered'] &&
             !$filters['no_registered'] &&
             $filters['past']
         ) {
@@ -300,8 +299,8 @@ class MeetupRepository extends ServiceEntityRepository
         }
 
         if (
-            $filters['coordinator']   ||
-            $filters['registered']    ||
+            $filters['coordinator'] ||
+            $filters['registered'] ||
             $filters['no_registered'] ||
             $filters['past']
         ) {
@@ -312,6 +311,33 @@ class MeetupRepository extends ServiceEntityRepository
         $qb->orderBy('meetup.start', 'DESC');
         $query = $qb->getQuery();
         return $query->getResult();
+
+    }
+
+    public function findDetails (int $id) : ?Meetup
+    {
+        return $this
+            ->getEntityManager()
+            ->createQuery(
+                <<<DQL
+                SELECT meetup,
+                    location,
+                    city,
+                    coordinator,
+                    campus,
+                    attendees
+                FROM App\Entity\Meetup meetup
+                    LEFT JOIN meetup.location location
+                        LEFT JOIN location.city city
+                    LEFT JOIN meetup.coordinator coordinator
+                    LEFT JOIN meetup.campus campus
+                    LEFT JOIN meetup.attendees attendees
+                WHERE meetup.id = :id
+                DQL
+            )
+            ->setParameter('id', $id)
+            ->getOneOrNullResult();
+
     }
 
 //    /**

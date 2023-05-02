@@ -35,7 +35,7 @@ class LocationFixtures
                 $this->generator->unique()->company()
             )
             ->setAddress(
-                $this->generator->address()
+                $this->generator->streetAddress()
             )
             ->setCity(
                 $this->getReference(CityFixtures::class . mt_rand(0, CityFixtures::COUNT - 1))

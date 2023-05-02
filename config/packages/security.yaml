@@ -31,11 +31,14 @@ security:
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800
+    role_hierarchy:
+        ROLE_ADMINISTRATOR: ROLE_USER
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: '^/$', roles: PUBLIC_ACCESS }
+        - { path: '^/login', roles: PUBLIC_ACCESS }
+        - { path: '^/', roles: ROLE_USER }
 
 when@test:
     security:

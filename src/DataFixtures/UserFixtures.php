@@ -71,10 +71,10 @@ class UserFixtures
         ?array $roles = null
     ) : User
     {
-        $name = ( $name ) ?: $this->generator->firstName();
-        $surname = ( $surname ) ?: $this->generator->lastName();
-        $nickname = ( $nickname ) ?: $this->generateUniqueNickname($name, $surname);
-        $email = ( $email ) ?: $nickname . '@' . $this->generator->safeEmailDomain();
+        $name ??= $this->generator->firstName();
+        $surname ??= $this->generator->lastName();
+        $nickname ??= $this->generateUniqueNickname($name, $surname);
+        $email ??= $nickname . '@' . $this->generator->safeEmailDomain();
 
         $user = new User();
         $user
@@ -98,7 +98,10 @@ class UserFixtures
 
     private function generateUniqueNickname (string $name, string $surname) : string
     {
-        $identifier = mb_strtolower($name) . '.' . mb_strtolower($surname);
+        $identifier =
+            iconv('UTF-8', 'ASCII//TRANSLIT', mb_strtolower($name))
+            . '.'
+            . iconv('UTF-8', 'ASCII//TRANSLIT', mb_strtolower($surname));
         $offset = $this->nicknameOffset[$identifier] ?? null;
 
         if ( $offset === null )

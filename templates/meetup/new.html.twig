@@ -1,0 +1,16 @@
+{% extends 'singlecard.html.twig' %}
+
+{% form_theme newMeetupFormView 'bootstrap_5_layout.html.twig' %}
+
+{% block title %}Nouvelle sortie{% endblock %}
+
+{% block card_header %}
+    <h2 class="text-center">Nouvelle sortie</h2>
+{% endblock %}
+
+{% block card_body %}
+    {{ form_start(newMeetupFormView) }}
+    {{ form_widget(newMeetupFormView) }}
+    <button class="form-control btn btn-primary" type="submit">Créer</button>
+    {{ form_end(newMeetupFormView) }}
+{% endblock %}

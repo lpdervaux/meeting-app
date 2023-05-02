@@ -17,3 +17,5 @@
 # IDEs
 /.idea/
 /.vscode/
+/public/images/user/
+!/public/images/user/default.JPG

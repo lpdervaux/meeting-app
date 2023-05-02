@@ -1,0 +1,132 @@
+{% extends 'singlecard.html.twig' %}
+
+{% block title %}Sortie : {{ meetup.name }}{% endblock %}
+
+{% block card_header %}
+    <h2 class="text-center">{{ meetup.name }}</h2>
+{% endblock %}
+
+{% block card_body %}
+<article>
+    {% if meetup.cancelled %}
+    <div class="alert alert-{{ ( cancelAlert ) ? 'danger' : 'secondary' }}">
+        <p>Cette sortie a été annulée</p>
+
+        <p class="h6">Date</p>
+        <p>{{ meetup.cancellationDate | format_datetime(locale='fr') }}</p>
+        <p class="h6">Raison</p>
+        <p class="mb-0">{{ meetup.cancellationReason }}</p>
+    </div>
+    {% endif %}
+
+    <div class="details {{ ( meetup.cancelled ) ? 'text-muted' : '' }}">
+        <p class="lead">{{ meetup.description }}</p>
+
+        <div class="mb-2">
+            <div class="d-flex gap-5">
+                <div class="location">
+                    <h5>Lieu</h5>
+                    <address>
+                        <strong>{{ meetup.location.name }}</strong><br>
+                        {{ meetup.location.address }}<br>
+                        {{ meetup.location.city.postalCode }} {{ meetup.location.city.name }}<br>
+                    </address>
+                </div>
+                <div class="date">
+                    <h5>Date</h5>
+                    <p>
+                        <time datetime="{{ meetup.start | date('c') }}">
+                            {{ meetup.start | format_datetime(locale='fr') }}
+                        </time>
+                    </p>
+                    <div>
+                        <h6>Durée</h6>
+                        <p>
+                            {% if meetup.duration.d > 0 and meetup.duration.h > 0 %}
+                                {{ '%d jour(s), %h heure(s)' | format(meetup.duration.d, meetup.duration.h) }}
+                            {% elseif meetup.duration.d > 0 %}
+                                {{ '%d jour(s)' | format(meetup.duration.d) }}
+                            {% elseif meetup.duration.h > 0 %}
+                                {{ '%h heure(s)' | format(meetup.duration.h) }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-5">
+                <div>
+                    <h5>Organisateur</h5>
+                    <p>
+                        <a class="text-decoration-none"
+                           href="{{ path('app_user_profile', { 'id' : meetup.coordinator.id}) }}">
+                            {{ meetup.coordinator.name }} {{ meetup.coordinator.surname }}
+                        </a>
+                    </p>
+                </div>
+                <div>
+                    <h5>Campus</h5>
+                    <p>{{ meetup.campus.name }}</p>
+                </div>
+            </div>
+
+            <div>
+                <h5>Participants</h5>
+                <ul>
+                    {% for attendee in meetup.attendees %}
+                        <li>
+                            <a class="text-decoration-none"
+                               href="{{ path('app_user_profile', { 'id' : attendee.id }) }}">
+                                {{ attendee.name }} {{ attendee.surname }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% form_theme detailsFormView.userRegister with [ 'form_div_layout.html.twig' ] only %}
+    {% form_theme detailsFormView.userCancel with [ 'form_div_layout.html.twig' ] only %}
+    {% form_theme detailsFormView.cancel with [ 'form_div_layout.html.twig' ] only %}
+
+    <div class="d-flex flex-row justify-content-evenly mb-4">
+        {% if userRegistrable %}
+            {{ form_widget(
+                detailsFormView.userRegister,
+                { 'attr' : { 'class' : 'btn btn-primary' } }
+            ) }}
+        {% endif %}
+        {% if userCancellable %}
+            {{ form_widget(
+                detailsFormView.userCancel,
+                { 'attr' : { 'class' : 'btn btn-primary' } }
+            ) }}
+        {% endif %}
+        {% if cancellable %}
+            <buttton class="btn btn-outline-primary"
+                     type="button"
+                     data-bs-toggle="collapse"
+                     data-bs-target="#cancelCollapse">Annuler</buttton>
+        {% endif %}
+    </div>
+
+    {{ form_start(detailsFormView) }}
+        {% if cancellable %}
+        <div id="cancelCollapse" class="collapse">
+            {{ form_row(detailsFormView.cancellationReason) }}
+            <div class="d-flex justify-content-center">
+                {{ form_widget(
+                    detailsFormView.cancel,
+                    { 'attr' : { 'class' : 'btn btn-danger' } }
+                ) }}
+            </div>
+        </div>
+        {% endif %}
+        {{ form_row(detailsFormView._token) }}
+    {{ form_end(detailsFormView, { 'render_rest' : false }) }}
+
+</article>
+{% endblock %}
+
+
