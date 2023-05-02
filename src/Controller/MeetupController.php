@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\Campus;
 use App\Repository\CampusRepository;
 use App\Repository\MeetupRepository;
+use App\Service\MeetupRegistrationService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -245,7 +246,8 @@ class MeetupController extends AbstractController
         int $id,
         Request $request,
         MeetupRepository $meetupRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        MeetupRegistrationService $registrationService
     ) : Response
     {
         $now = new \DateTimeImmutable();
@@ -265,18 +267,6 @@ class MeetupController extends AbstractController
             $response = $this->render('meetup/archived.html.twig');
         else
         {
-            $status = $meetup->getStatus($now);
-            $attending = $meetup
-                ->getAttendees()
-                ->contains($user);
-
-            $userRegistrable =
-                ( $status === MeetupStatus::Open )
-                && ( ! $attending )
-                && ( $meetup->getAttendees()->count() < $meetup->getCapacity() );
-            $userCancellable =
-                ( $status === MeetupStatus::Open )
-                && ( $attending );
             $cancellable =
                 ( ! $meetup->isCancelled() )
                 && ( $now < $meetup->getStart() )
@@ -294,33 +284,23 @@ class MeetupController extends AbstractController
             $detailsForm->handleRequest($request);
             if ( $detailsForm->isSubmitted() )
             {
-                if (
-                    $detailsForm
-                        ->get('userRegister')
-                        ->isClicked()
-                    && $userRegistrable
-                ) {
-                    $meetup->addAttendee($user);
-                    $entityManager->persist($meetup);
-                    $entityManager->flush();
+                if ( $detailsForm->get('userRegister')->isClicked() )
+                {
+                    $success = $registrationService->register($meetup, $user);
 
-                    $this->addFlash('success', 'Inscription réussie');
-                    $userRegistrable = false;
-                    $userCancellable = true;
+                    if ( $success )
+                        $this->addFlash('success', 'Inscription réussie');
+                    else
+                        $this->addFlash('warning', 'Inscription échouée');
                 }
-                else if (
-                    $detailsForm
-                        ->get('userCancel')
-                        ->isClicked()
-                    && $userCancellable
-                ) {
-                    $meetup->removeAttendee($user);
-                    $entityManager->persist($meetup);
-                    $entityManager->flush();
+                else if ( $detailsForm->get('userCancel')->isClicked() )
+                {
+                    $success = $registrationService->cancel($meetup, $user);
 
-                    $this->addFlash('success', 'Désistement réussi');
-                    $userCancellable = false;
-                    $userRegistrable = true;
+                    if ( $success )
+                        $this->addFlash('success', 'Désistement réussi');
+                    else
+                        $this->addFlash('warning', 'Désistement échoué');
                 }
                 else if (
                     $detailsForm
@@ -338,6 +318,9 @@ class MeetupController extends AbstractController
                     $cancellable = false;
                 }
             }
+
+            $userRegistrable = $meetup->canRegister($user);
+            $userCancellable = $meetup->canCancel($user);
 
             $cancelAlert =
                 ( $meetup->isCancelled() )
