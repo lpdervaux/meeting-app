@@ -45,13 +45,23 @@ class MeetupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $filters = $form->getData();
-            $session->set('filters', $filters);
-            $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
-            dump($meetupList);
 
-            $form = $this->generateForm($campusRepository, $session);
-        } else {
+            if($request->request->get('create_button'))
+            {
+                return $this-> redirectToRoute('app_meetup_new');
+            }
+            else
+            {
+                $filters = $form->getData();
+                $session->set('filters', $filters);
+                $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
+                dump($meetupList);
+
+                $form = $this->generateForm($campusRepository, $session);
+            }
+        }
+        else
+        {
             $filters = array(
                 'campus' =>
                     $session->get('filters') == null ?
@@ -90,7 +100,7 @@ class MeetupController extends AbstractController
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
         }
 
-        return $this->render('meetup/index.html.twig', [
+        return $this->render('meetup/list.html.twig', [
             'form' => $form,
             'meetup_list' => $meetupList
         ]);

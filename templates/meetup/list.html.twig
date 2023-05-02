@@ -74,9 +74,9 @@
             <td>Organisateur</td>
             <td>Actions</td>
         </tr>
-        {% set registered = 'false' %}
         {% if meetup_list | length !=0 and meetup_list!=null %}
         {% for meetup in meetup_list %}
+            {% set registered = 'false' %}
             <tr>
                 <td>{{ meetup.name }}</td>
                 <td>{{ meetup.start | date}}</td>
@@ -104,7 +104,6 @@
                     {% if (meetup.coordinator == app.user or is_granted('ROLE_ADMINISTRATOR')) and (meetup.status.name == 'Open' or  meetup.status.name=='Scheduled') %}
                         <a href="">Modifier</a>
                     {% endif %}
-
                 </td>
             </tr>
         {% endfor %}
