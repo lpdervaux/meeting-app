@@ -10,7 +10,24 @@
 
 {% block card_body %}
     {{ form_start(newMeetupFormView) }}
-    {{ form_widget(newMeetupFormView) }}
+    {{ form_row(newMeetupFormView.name) }}
+    {{ form_row(newMeetupFormView.description) }}
+    {{ form_row(newMeetupFormView.capacity) }}
+    {{ form_row(newMeetupFormView.campus) }}
+    <div class="form-control mb-2">
+        {{ form_label(newMeetupFormView.location) }}
+        <div class="d-flex mb-2">
+            {{ form_widget(newMeetupFormView.location.location) }}
+            <button class="btn btn-outline-primary"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#locationCollapse">Nouveau</button>
+        </div>
+        <div id="locationCollapse" class="collapse mb-2">
+            {{ form_widget(newMeetupFormView.location.newLocation) }}
+        </div>
+    </div>
+    {{ form_rest(newMeetupFormView) }}
     <button class="form-control btn btn-primary" type="submit">Créer</button>
     {{ form_end(newMeetupFormView) }}
 {% endblock %}

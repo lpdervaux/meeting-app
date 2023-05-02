@@ -36,6 +36,7 @@ class Location
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?City $city = null;
 
     public function getId(): ?int

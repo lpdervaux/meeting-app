@@ -35,7 +35,7 @@ class Meetup
     #[Assert\Range(min: 5, max: 50)]
     private ?int $capacity = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(cascade: [ 'persist' ])]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Location $location = null;

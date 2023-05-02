@@ -7,11 +7,9 @@ namespace App\Form;
 use App\Entity\Meetup;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\DateIntervalType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Range;
 
 class MeetupType extends AbstractType
 {
@@ -38,12 +36,8 @@ class MeetupType extends AbstractType
             )
             ->add(
                 'location',
-                EntityType::class,
-                [
-                    'class' => 'App\Entity\Location',
-                    'choice_label' => 'name',
-                    'label' => 'Lieu'
-                ]
+                CompoundLocationType::class,
+                [ 'label' => 'Lieu' ]
             )
             ->add(
                 'registrationStart',

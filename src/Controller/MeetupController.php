@@ -1,10 +1,12 @@
 <?php
 
 declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Campus;
 use App\Repository\CampusRepository;
+use App\Repository\LocationRepository;
 use App\Repository\MeetupRepository;
 use App\Service\MeetupCancellationService;
 use App\Service\MeetupRegistrationService;
@@ -14,7 +16,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 use App\Entity\Meetup;
-use App\Entity\MeetupStatus;
 use App\Entity\User;
 use App\Form\MeetupType;
 use App\Form\MeetupDetailsType;
