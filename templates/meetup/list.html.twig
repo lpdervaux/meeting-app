@@ -63,17 +63,19 @@
             </div>
         </div>
         <div class="col ms-3 me-3">
-            <table class="table border">
-                <tr>
-                    <td>Nom de la sortie</td>
-                    <td>Date de la sortie</td>
-                    <td>Clôture</td>
-                    <td>inscrits/places</td>
-                    <td>Etat</td>
-                    <td>Inscrit</td>
-                    <td>Organisateur</td>
-                    <td>Actions</td>
-                </tr>
+            <table class="table border table-sm table-responsive-md">
+                <thead>
+                    <tr>
+                        <th scope="col">Nom de la sortie</th>
+                        <th scope="col">Date de la sortie</th>
+                        <th scope="col">Clôture</th>
+                        <th scope="col">inscrits/places</th>
+                        <th scope="col">Etat</th>
+                        <th scope="col">Inscrit</th>
+                        <th scope="col">Organisateur</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
                 {% if meetup_list | length !=0 and meetup_list!=null %}
                     {% for meetup in meetup_list %}
                         {% set registered = 'false' %}

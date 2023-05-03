@@ -1,5 +1,9 @@
 # Meeting App
 
+If `dev` is broken, `main` should be stable. If `main` is broken, yell at us.
+
+## Fixtures
+
 Run `doctrine:fixtures:load` to load dev fixtures.
 
 ### Users
@@ -8,7 +12,7 @@ Users include 2 default accounts:
 * `user@example.org`, a regular user account
 * `administrator@example.org`, an administrator account
 
-Every generated account's password is the username part of its email, which is also its username.
+Every generated account's password is the username part of its email, which is also its nickname.
 
 ### Meetups
 
