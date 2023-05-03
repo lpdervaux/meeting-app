@@ -37,7 +37,7 @@ class MeetupType extends AbstractType
             ->add(
                 'location',
                 CompoundLocationType::class,
-                [ 'label' => 'Lieu' ]
+                [ 'label' => 'Lieu']
             )
             ->add(
                 'registrationStart',

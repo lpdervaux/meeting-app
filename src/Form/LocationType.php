@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Location;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,7 +21,7 @@ class LocationType extends AbstractType
             ->add(
                 'city',
                 CompoundCityType::class,
-                [ 'label' => 'Ville' ]
+                [ 'label' => 'Ville', 'required' => false ]
             )
         ;
     }

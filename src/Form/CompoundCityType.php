@@ -5,94 +5,48 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\City;
-use App\Validator\CompoundCityConstraint;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CompoundCityType
-    extends AbstractType
-    implements DataMapperInterface
+class CompoundCityType extends CompoundEntityType
 {
-    public const LIST_PROPERTY_PATH = 'city';
-    public const NEW_PROPERTY_PATH = 'new_city';
+    public const ENTITY_NULL = __CLASS__ . 'null';
+    public const ENTITY_PARTIAL = __CLASS__ . 'partial';
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    protected const NULL_MESSAGE = 'Please select a city';
+
+    public function buildForm (FormBuilderInterface $builder, array $options) : void
     {
+        parent::buildForm($builder, $options);
+
         $builder
             ->add(
-                'city',
+                $this::NAME_LIST,
                 EntityType::class,
                 [
                     'class' => 'App\Entity\City',
                     'choice_label' => 'name',
-                    'placeholder' => '',
-                    'required' => false,
-                    'property_path' => self::LIST_PROPERTY_PATH
+                    ... $this->getListOptions()
                 ]
             )
             ->add(
-                'newCity',
+                $this::NAME_NEW,
                 CityType::class,
-                [
-                    'required' => false,
-                    'property_path' => self::NEW_PROPERTY_PATH
-                ]
-            )
-            ->setDataMapper($this);
-        ;
+                [ ... $this->getNewOptions() ]
+            );
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
+    public function configureOptions (OptionsResolver $resolver) : void
     {
-        $resolver->setDefaults([
-            'data_class' => City::class,
-            'compound' => true,
-            'label' => '',
-            'error_bubbling' => true,
-            'constraints' => [ new CompoundCityConstraint() ]
-        ]);
+        parent::configureOptions($resolver);
+        $resolver->setDefaults([ 'data_class' => City::class ]);
+
     }
 
-    public function mapDataToForms (mixed $viewData, \Traversable $forms) : void
+    protected function isPartial (mixed $entity) : bool
     {
-        if ( $viewData )
-        {
-            /** @var FormInterface[] $forms */
-            $forms = iterator_to_array($forms);
-
-            $city = $forms['city'];
-            $newCity = $forms['newCity'];
-
-            if ( $viewData->getId() )
-                $city->setData($viewData);
-            else
-                $newCity->setData($viewData);
-        }
-    }
-
-    public function mapFormsToData (\Traversable $forms, mixed &$viewData) : void
-    {
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-
-        $cityData = $forms['city']->getData();
-        $newCityData = $forms['newCity']->getData();
-
-        if ( $cityData )
-            $viewData = $cityData;
-        else if (
-            $newCityData
-            && (
-                $newCityData->getName()
-                || $newCityData->getPostalCode()
-            )
-        )
-            $viewData = $newCityData;
-        else
-            $viewData = null;
+        return ( $entity->getName() )
+            || ( $entity->getPostalCode() );
     }
 }

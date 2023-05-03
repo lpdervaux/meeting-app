@@ -21,41 +21,41 @@
         <div class="mb-2">
             <div class="d-flex">
                 <div class="w-100 me-1">
-                    {{ form_widget(newMeetupFormView.location.location) }}
+                    {{ form_widget(newMeetupFormView.location.list) }}
                 </div>
                 <button class="btn btn-outline-primary"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#locationCollapse">Nouveau</button>
             </div>
-            {{ form_help(newMeetupFormView.location.location) }}
-            {{ form_errors(newMeetupFormView.location.location) }}
+            {{ form_help(newMeetupFormView.location.list) }}
+            {{ form_errors(newMeetupFormView.location.list) }}
         </div>
         <div id="locationCollapse" class="collapse mb-3 {{ showNewLocation ? 'show' : '' }}">
-            {{ form_row(newMeetupFormView.location.newLocation.name) }}
-            {{ form_row(newMeetupFormView.location.newLocation.address) }}
-            {{ form_row(newMeetupFormView.location.newLocation.latitude) }}
-            {{ form_row(newMeetupFormView.location.newLocation.longitude) }}
+            {{ form_row(newMeetupFormView.location.new.name) }}
+            {{ form_row(newMeetupFormView.location.new.address) }}
+            {{ form_row(newMeetupFormView.location.new.latitude) }}
+            {{ form_row(newMeetupFormView.location.new.longitude) }}
 
-            {{ form_label(newMeetupFormView.location.newLocation.city) }}
+            {{ form_label(newMeetupFormView.location.new.city) }}
             <div class="form-control mb-2 pt-3">
                 <div class="mb-2">
                     <div class="d-flex">
                         <div class="w-100 me-1">
-                            {{ form_widget(newMeetupFormView.location.newLocation.city.city) }}
+                            {{ form_widget(newMeetupFormView.location.new.city.list) }}
                         </div>
                         <button class="btn btn-outline-primary"
                                 type="button"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#cityCollapse">Nouvelle</button>
                     </div>
-                    {{ form_help(newMeetupFormView.location.newLocation.city.city) }}
-                    {{ form_errors(newMeetupFormView.location.newLocation.city.city) }}
+                    {{ form_help(newMeetupFormView.location.new.city.list) }}
+                    {{ form_errors(newMeetupFormView.location.new.city.list) }}
                 </div>
                 <div id="cityCollapse" class="collapse mb-3 {{ showNewCity ? 'show' : '' }}">
-                    {{ form_widget(newMeetupFormView.location.newLocation.city.newCity) }}
-                    {{ form_help(newMeetupFormView.location.newLocation.city.newCity) }}
-                    {{ form_errors(newMeetupFormView.location.newLocation.city.newCity) }}
+                    {{ form_widget(newMeetupFormView.location.new.city.new) }}
+                    {{ form_help(newMeetupFormView.location.new.city.new) }}
+                    {{ form_errors(newMeetupFormView.location.new.city.new) }}
                 </div>
             </div>
         </div>
