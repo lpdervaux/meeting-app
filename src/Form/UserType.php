@@ -24,8 +24,7 @@ class UserType extends AbstractType
 
         $url = $this->uri = $_SERVER['REQUEST_URI'];
         global $name;
-        if (str_contains($url, 'edit')) $name = 'edit';
-        else if(str_contains($url, 'new')) $name = 'new';
+        if(str_contains($url, 'meeting-app/public/new')) $name = 'new';
 
 
         $builder
