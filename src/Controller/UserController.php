@@ -113,15 +113,9 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
         }
 
-        $url = $this->uri = $_SERVER['REQUEST_URI'];
-        global $name;
-        if (str_contains($url, 'edit')) $name = 'edit';
-        else if(str_contains($url, 'new')) $name = 'new';
-
         return $this->render('profile/edit.html.twig', [
             'profilEditForm' => $form->createView(),
-            'user' => $user,
-            'hidden' => $name
+            'user' => $user
         ]);
     }
 
@@ -151,14 +145,14 @@ class UserController extends AbstractController
             throw $this->createNotFoundException('User not found');
         } elseif (in_array('ROLE_ADMINISTRATOR', $user->getRoles())) {
 
-            $this->addFlash('error', 'Impossible de supprimer un administrateur');
+            $this->addFlash('error', 'Impossible de supprimer un administrateur !');
             return $this->redirectToRoute('app_user_list');
         }
 
         $entityManager->remove($user);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Utilisateur supprimer avec succès');
+        $this->addFlash('success', 'Utilisateur supprimer avec succès !');
 
         return $this->redirectToRoute('app_user_list');
     }
@@ -170,14 +164,14 @@ class UserController extends AbstractController
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         } elseif (in_array('ROLE_ADMINISTRATOR', $user->getRoles())) {
-            $this->addFlash('error', 'Impossible de bannir un administrateur');
+            $this->addFlash('error', 'Impossible de bannir un administrateur !');
 
             return $this->redirectToRoute('app_user_list');
         }
 
         $user->setActive(false);
         $entityManager->flush();
-        $this->addFlash('success', 'Utilisateur banni avec succès');
+        $this->addFlash('success', 'Utilisateur banni avec succès !');
 
         return $this->redirectToRoute('app_user_list');
     }
@@ -187,7 +181,7 @@ class UserController extends AbstractController
     {
         $user->setActive(true);
         $entityManager->flush();
-        $this->addFlash('success', 'L\'utilisateur a été réactivé avec succès.');
+        $this->addFlash('success', 'L\'utilisateur a été réactivé avec succès !');
 
         return $this->redirectToRoute('app_user_list');
     }
