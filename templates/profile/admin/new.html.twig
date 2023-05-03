@@ -6,6 +6,9 @@
     {% for message in app.flashes('success') %}
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6 mx-auto">
@@ -66,6 +69,7 @@
                         <div class="form-group">
                             {{ form_label(form.imageFile, 'Télécharger le fichier') }}
                             {{ form_widget(form.imageFile) }}
+                            {{ form_error(form.imageFile) }}
                         </div>
                         <div class="card-footer text-center">
                             <button class="btn btn-primary">Créer</button>

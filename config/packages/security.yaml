@@ -39,8 +39,8 @@ security:
         - { path: '^/meetup', roles : ROLE_USER}
         - { path: '^/$', roles: ROLE_USER }
         - { path: '^/login', roles: PUBLIC_ACCESS }
-        - { path: '^/', roles: ROLE_USER }
-
+        - { path: '^/new$', roles: ROLE_ADMINISTRATOR }
+        - { path: '^/profile$', roles: ROLE_ADMINISTRATOR }
 when@test:
     security:
         password_hashers:

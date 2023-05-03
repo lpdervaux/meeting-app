@@ -80,6 +80,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Seriali
     #[ORM\ManyToMany(targetEntity: Meetup::class, mappedBy: 'attendees')]
     private Collection $meetups;
 
+    #[ORM\Column]
+    private ?bool $active = true;
+
     public function __construct()
     {
         $this->meetups = new ArrayCollection();
@@ -328,6 +331,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Seriali
             $this->campus,
             $this->meetups,
         ] = unserialize($serialized);
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): self
+    {
+        $this->active = $active;
+
+        return $this;
     }
 
 }

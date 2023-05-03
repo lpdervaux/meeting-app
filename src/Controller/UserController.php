@@ -11,7 +11,6 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -26,7 +25,7 @@ class UserController extends AbstractController
     public function list(UserRepository $userRepository, PaginatorInterface $paginator, Request $request): Response
     {
         $query = $userRepository->createQueryBuilder('u')
-            ->orderBy('u.nickname', 'ASC') // Tri par ordre alphabétique croissant du pseudo
+            ->orderBy('u.nickname', 'ASC')
             ->getQuery();
 
         $pagination = $paginator->paginate(
@@ -45,35 +44,33 @@ class UserController extends AbstractController
 
     #[Route('/profile/{id}', name: 'app_user_profile', methods:['GET'])]
 
-    public function profil(int $id, UserRepository $userRepository): Response
+    public function profil(int $id, UserRepository $userRepository, Security $security): Response
     {
-
-        // récupère ce user en fonction de l'id présent dans l'URL
 
         $user = $userRepository->find($id);
 
-        // s'il n'existe pas en bdd, on déclenche une erreur 404
-        if (!$user){
-            throw $this->createNotFoundException('This user do not exists! Sorry!');
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('app_login');
+        } elseif (!$user) {
+            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('profile/details.html.twig', [
-            //les passe à Twig
-            "user" => $user
+            'user' => $user,
         ]);
     }
 
-    #[Route('/new', name: 'admin_user_new', methods:['GET', "POST"])]
+    #[Route('/new', name: 'app_user_new', methods:['GET', "POST"])]
 
     public function new(RoleRepository $roleRepository,Request $request,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
+
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // Ajout du rôle "user" par défaut
             $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);
             $user->addRole($userRole);
 
@@ -90,8 +87,15 @@ class UserController extends AbstractController
 
     #[Route('/profile/{id}/edit', name: 'app_user_edit', methods:['GET', "POST"])]
 
-    public function edit(Security $security,Request $request, User $user,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function edit(Security $security, Request $request, User $user,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
+
+        if (!$security->isGranted('ROLE_ADMINISTRATOR')) {
+            // Vérifier si l'utilisateur connecté est bien le propriétaire du profil
+            if ($security->getUser() !== $user) {
+                return $this->redirectToRoute('app_home');
+            }
+        }
 
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
@@ -114,7 +118,6 @@ class UserController extends AbstractController
             'profilEditForm' => $form->createView(),
             'user' => $user,
         ]);
-
     }
 
     /**
@@ -124,27 +127,62 @@ class UserController extends AbstractController
     {
             // Hash the user's password
             $password = $form->get('plainPassword')->getData();
+
+            if ($password !== null) {
             $hashedPassword = $passwordHasher->hashPassword($user, $password);
             $user->setPassword($hashedPassword);
+            }
 
             $entityManager->persist($user);
             $entityManager->flush();
-
-
     }
 
     #[Route('/profile/{id}', name: 'app_user_delete', methods: ['POST', 'DELETE'])]
     public function delete(EntityManagerInterface $entityManager, UserRepository $userRepository, int $id): Response
     {
         $user = $userRepository->find($id);
+
         if (!$user) {
             throw $this->createNotFoundException('User not found');
+        } elseif (in_array('ROLE_ADMINISTRATOR', $user->getRoles())) {
+
+            $this->addFlash('error', 'Impossible de supprimer un administrateur');
+            return $this->redirectToRoute('app_user_list');
         }
 
         $entityManager->remove($user);
         $entityManager->flush();
 
         $this->addFlash('success', 'Utilisateur supprimer avec succès');
+
+        return $this->redirectToRoute('app_user_list');
+    }
+
+    #[Route('/profile/{id}/ban', name: 'app_user_ban', methods: ['POST'])]
+    public function ban(EntityManagerInterface $entityManager, UserRepository $userRepository, int $id): Response
+    {
+        $user = $userRepository->find($id);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        } elseif (in_array('ROLE_ADMINISTRATOR', $user->getRoles())) {
+            $this->addFlash('error', 'Impossible de bannir un administrateur');
+
+            return $this->redirectToRoute('app_user_list');
+        }
+
+        $user->setActive(false);
+        $entityManager->flush();
+        $this->addFlash('success', 'Utilisateur banni avec succès');
+
+        return $this->redirectToRoute('app_user_list');
+    }
+
+    #[Route('/profile/{id}/unban', name: 'app_user_unban', methods: ['POST'])]
+    public function unban(User $user, EntityManagerInterface $entityManager): Response
+    {
+        $user->setActive(true);
+        $entityManager->flush();
+        $this->addFlash('success', 'L\'utilisateur a été réactivé avec succès.');
 
         return $this->redirectToRoute('app_user_list');
     }

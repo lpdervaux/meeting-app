@@ -22,11 +22,19 @@
 
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       href="{{ path('app_user_profile', { 'id' : app.user.id }) }}">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="#"
+                       data-bs-toggle="dropdown">
                         Profil
                     </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ path('app_user_profile', { 'id' : app.user.id }) }}">Mon Profile</a></li>
+                        {% if is_granted('ROLE_ADMINISTRATOR') %}
+                            <li><a class="dropdown-item" href="{{ path('app_user_new') }}">Créer un utilisateur</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_user_list') }}">Profile des utilisateurs</a></li>
+                        {% endif %}
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"

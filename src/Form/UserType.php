@@ -12,6 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Vich\UploaderBundle\Form\Type\VichImageType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class UserType extends AbstractType
 {
@@ -38,16 +39,14 @@ class UserType extends AbstractType
                 // this is read and encoded in the controller
                 'type' => PasswordType::class,
                 'mapped' => false,
-                'attr' => [
-                    'autocomplete' => 'new-password'],
                 'constraints' => [
                     new NotBlank([
                         'groups' => ['new'],
-                        'message' => 'Password should not be blank.',
+                        'message' => 'Le mot de passe ne peut pas être vide',
                     ]),
                     new Length([
                         'min' => 6,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
+                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractère',
                         // max length allowed by Symfony for security reasons
                         'max' => 4096,
                     ]),
@@ -63,8 +62,20 @@ class UserType extends AbstractType
             ->add('imageFile', VichImageType::class, [
                 'label' => 'Télécharger vers le server',
                 'required' => false,
+                'download_uri' => false,
+                'delete_label' => 'Cochez si vous souhaitez supprimer votre image de profil',
+                'constraints' => [
+                    new Assert\Image([
+                        'maxSize' => '2M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                        ],
+                        'maxSizeMessage' => 'Le fichier ne doit pas dépasser {{ limit }}.',
+                        'mimeTypesMessage' => 'Le fichier doit être un fichier de type {{ types }}.',
+                    ]),
+                ],
             ])
-
         ;
     }
 }

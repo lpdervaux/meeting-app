@@ -2,7 +2,11 @@
 
 {% block body %}
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
     {% endfor %}
     <div class="container">
         <h1>Liste des utilisateurs</h1>
@@ -13,9 +17,21 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ user.nickname }}</h5>
                             <a href="{{ path('app_user_profile', {'id': user.id}) }}" class="btn btn-primary">Voir le profil</a>
-                            <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" class="d-inline">
+                            <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                                 <input type="hidden" name="_method" value="DELETE">
                                 <button class="btn btn-danger">Supprimer</button>
+                            </form>
+                                    {% if user.isActive %}
+                                        <form action="{{ path('app_user_ban', {'id': user.id}) }}" method="post" class="d-inline">
+                                            <input type="hidden" name="_method" value="PATCH">
+                                            <button class="btn btn-warning">Rendre inactif</button>
+                                        </form>
+                                    {% else %}
+                                        <form action="{{ path('app_user_unban', {'id': user.id}) }}" method="post" class="d-inline">
+                                            <input type="hidden" name="_method" value="PATCH">
+                                            <button class="btn btn-success">Rendre actif</button>
+                                        </form>
+                                    {% endif %}
                             </form>
                         </div>
                     </div>
