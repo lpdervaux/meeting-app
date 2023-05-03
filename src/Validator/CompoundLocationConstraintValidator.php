@@ -16,7 +16,7 @@ class CompoundLocationConstraintValidator extends ConstraintValidator
             $this->context
                 ->buildViolation('Please select a valid location')
                 ->setCode(CompoundLocationConstraint::NULL_ENTITY_CODE)
-                ->atPath(CompoundLocationType::ENTITY_PROPERTY_PATH)
+                ->atPath(CompoundLocationType::LIST_PROPERTY_PATH)
                 ->addViolation();
         else
         {

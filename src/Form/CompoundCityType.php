@@ -17,6 +17,9 @@ class CompoundCityType
     extends AbstractType
     implements DataMapperInterface
 {
+    public const LIST_PROPERTY_PATH = 'city';
+    public const NEW_PROPERTY_PATH = 'new_city';
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -27,13 +30,17 @@ class CompoundCityType
                     'class' => 'App\Entity\City',
                     'choice_label' => 'name',
                     'placeholder' => '',
-                    'required' => false
+                    'required' => false,
+                    'property_path' => self::LIST_PROPERTY_PATH
                 ]
             )
             ->add(
                 'newCity',
                 CityType::class,
-                [ 'required' => false ]
+                [
+                    'required' => false,
+                    'property_path' => self::NEW_PROPERTY_PATH
+                ]
             )
             ->setDataMapper($this);
         ;

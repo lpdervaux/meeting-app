@@ -9,6 +9,7 @@ use App\Repository\CampusRepository;
 use App\Repository\MeetupRepository;
 use App\Service\MeetupCancellationService;
 use App\Service\MeetupRegistrationService;
+use App\Validator\CompoundCityConstraint;
 use App\Validator\CompoundLocationConstraint;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -359,14 +360,23 @@ class MeetupController extends AbstractController
         else
         {
             $errors = $form->getErrors(true);
-            $newLocationErrors = $errors->findByCodes(CompoundLocationConstraint::PARTIAL_ENTITY_CODE);
-            $newLocationInvalid = ( $newLocationErrors->count() > 0 );
+            $newCityErrors = $errors->findByCodes(CompoundCityConstraint::PARTIAL_ENTITY_CODE);
+            $newCityInvalid = ( $newCityErrors->count() > 0 );
+
+            if ( $newCityInvalid )
+                $newLocationInvalid = true;
+            else
+            {
+                $newLocationErrors = $errors->findByCodes(CompoundLocationConstraint::PARTIAL_ENTITY_CODE);
+                $newLocationInvalid = ( $newLocationErrors->count() > 0 );
+            }
 
             $response = $this->render(
                 'meetup/new.html.twig',
                 [
                     'newMeetupFormView' => $form->createView(),
-                    'showNewLocation' => $newLocationInvalid
+                    'showNewLocation' => $newLocationInvalid,
+                    'showNewCity' => $newCityInvalid
                 ]
             );
         }

@@ -52,7 +52,7 @@
                     {{ form_help(newMeetupFormView.location.newLocation.city.city) }}
                     {{ form_errors(newMeetupFormView.location.newLocation.city.city) }}
                 </div>
-                <div id="cityCollapse" class="collapse mb-3">
+                <div id="cityCollapse" class="collapse mb-3 {{ showNewCity ? 'show' : '' }}">
                     {{ form_widget(newMeetupFormView.location.newLocation.city.newCity) }}
                     {{ form_help(newMeetupFormView.location.newLocation.city.newCity) }}
                     {{ form_errors(newMeetupFormView.location.newLocation.city.newCity) }}
