@@ -89,7 +89,6 @@ class UserController extends AbstractController
 
     public function edit(Security $security, Request $request, User $user,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-
         if (!$security->isGranted('ROLE_ADMINISTRATOR')) {
             // Vérifier si l'utilisateur connecté est bien le propriétaire du profil
             if ($security->getUser() !== $user) {
@@ -114,9 +113,15 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
         }
 
+        $url = $this->uri = $_SERVER['REQUEST_URI'];
+        global $name;
+        if (str_contains($url, 'edit')) $name = 'edit';
+        else if(str_contains($url, 'new')) $name = 'new';
+
         return $this->render('profile/edit.html.twig', [
             'profilEditForm' => $form->createView(),
             'user' => $user,
+            'hidden' => $name
         ]);
     }
 
