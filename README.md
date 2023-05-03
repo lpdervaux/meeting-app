@@ -1,5 +1,9 @@
 # Meeting App
 
+If `dev` is broken, `main` should be stable. If `main` is broken, yell at us.
+
+## Fixtures
+
 Run `doctrine:fixtures:load` to load dev fixtures.
 
 ### Users
