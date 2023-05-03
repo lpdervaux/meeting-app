@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Validator;
 
+use App\Form\CompoundLocationType;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -14,17 +15,23 @@ class CompoundLocationConstraintValidator extends ConstraintValidator
         if ( ! $value )
             $this->context
                 ->buildViolation('Please select a valid location')
-                ->atPath('location')
+                ->setCode(CompoundLocationConstraint::NULL_ENTITY_CODE)
+                ->atPath(CompoundLocationType::ENTITY_PROPERTY_PATH)
                 ->addViolation();
         else
         {
             $violations = $this->context->getValidator()->validate($value);
 
             if ( $violations->count() > 0 )
-                $this->context
-                    ->buildViolation('Please fill new location information.')
-                    ->atPath('location') // TODO: find how to map the error to the correct fields
-                    ->addViolation();
+                foreach ( $violations as $violation )
+                {
+                    $this->context
+                        ->buildViolation($violation->getMessage())
+                        ->setInvalidValue($violation->getInvalidValue())
+                        ->setCode(CompoundLocationConstraint::PARTIAL_ENTITY_CODE)
+                        ->atPath(CompoundLocationType::NEW_PROPERTY_PATH . '.' . $violation->getPropertyPath())
+                        ->addViolation();
+                }
         }
     }
 }

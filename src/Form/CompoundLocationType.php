@@ -17,6 +17,9 @@ class CompoundLocationType
     extends AbstractType
     implements DataMapperInterface
 {
+    public const ENTITY_PROPERTY_PATH = 'location';
+    public const NEW_PROPERTY_PATH = 'new_location';
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -27,10 +30,18 @@ class CompoundLocationType
                     'class' => 'App\Entity\Location',
                     'choice_label' => 'name',
                     'placeholder' => '',
-                    'required' => false
+                    'required' => false,
+                    'property_path' => self::ENTITY_PROPERTY_PATH
                 ]
             )
-            ->add('newLocation', LocationType::class, [ 'required' => false ])
+            ->add(
+                'newLocation',
+                LocationType::class,
+                [
+                    'required' => false,
+                    'property_path' => self::NEW_PROPERTY_PATH
+                ]
+            )
             ->setDataMapper($this)
         ;
     }
@@ -40,8 +51,8 @@ class CompoundLocationType
         $resolver->setDefaults([
             'data_class' => Location::class,
             'compound' => true,
-            'label' => '',
             'error_bubbling' => true,
+            'label' => '',
             'constraints' => [ new CompoundLocationConstraint() ]
         ]);
     }

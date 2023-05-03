@@ -31,7 +31,7 @@
             {{ form_help(newMeetupFormView.location.location) }}
             {{ form_errors(newMeetupFormView.location.location) }}
         </div>
-        <div id="locationCollapse" class="collapse mb-3">
+        <div id="locationCollapse" class="collapse mb-3 {{ showNewLocation ? 'show' : '' }}">
             {{ form_row(newMeetupFormView.location.newLocation.name) }}
             {{ form_row(newMeetupFormView.location.newLocation.address) }}
             {{ form_row(newMeetupFormView.location.newLocation.latitude) }}
