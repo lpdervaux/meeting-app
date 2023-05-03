@@ -8,6 +8,7 @@ use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use mysql_xdevapi\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormInterface;
@@ -15,6 +16,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\CsvEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * @method getDoctrine()
@@ -185,5 +189,75 @@ class UserController extends AbstractController
 
         return $this->redirectToRoute('app_user_list');
     }
+
+    #[Route('/insert', name: 'app_user_insert')]
+    public function insert(EntityManagerInterface $entityManager, UserRepository $userRepository): Response
+    {
+        $error = null;
+        $userAttributes =
+            [
+                'nickname',
+                'name',
+                'surname',
+                'phoneNumber',
+                'email',
+                'password',
+                'campus'
+            ];
+
+        $file = "../data/test.csv";
+        $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
+        $normalizers = [new ObjectNormalizer()];
+        $encoder = [
+            new CsvEncoder()
+        ];
+        $serializer = new Serializer($normalizers, $encoder);
+        $fileString = file_get_contents($file);
+        $data = $serializer->decode($fileString, $fileExtension);
+
+        $error = $this->checkColumnName($userAttributes,$data)
+            .$this->checkColumnName($userAttributes,$data);
+
+        return $this->render('profile/admin/insert.html.twig', [
+            'error' => $error
+        ]);
+
+    }
+
+    private function checkColumnName($userAttributes, $data)
+    {
+        $counter= 0;
+        $error = 'Les colonnes de votre tableau doivent contenir :';
+        foreach ($userAttributes as $ua) {$error = $error.", ".$ua;}
+        $error = $error.'. Il vous manque : ';
+
+        foreach($userAttributes as $key1 => $ua)
+        {
+            $check = false;
+            foreach($data[0] as $key2 => $d)
+            {
+                if(strtolower(trim($ua)) == strtolower(trim($key2)) )
+                {
+                    $counter++;
+                    $check = true;
+                }
+            }
+            if(!$check)
+            {
+                $error= $error.$ua.", ";
+            }
+        }
+
+        $error=substr_replace($error, '.', strlen($error)-2, 2 );
+
+        if($counter== count($userAttributes)) {return null;}
+        else return $error;
+    }
+
+    private function checkTableContents()
+    {
+
+    }
+
 
 }
