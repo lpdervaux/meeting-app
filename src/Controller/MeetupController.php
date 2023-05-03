@@ -273,34 +273,22 @@ class MeetupController extends AbstractController
             $detailsForm->handleRequest($request);
             if ( $detailsForm->isSubmitted() )
             {
-                if ( $detailsForm->get('userRegister')->isClicked() )
+                $clicked = $detailsForm->getClickedButton()?->getName();
+                $flash = $request->getSession()->getFlashBag();
+
+                switch ( $clicked )
                 {
-                    $success = $registrationService->register($meetup, $user);
-
-                    if ( $success )
-                        $this->addFlash('success', 'Inscription réussie');
-                    else
-                        $this->addFlash('warning', 'Inscription échouée');
-                }
-                else if ( $detailsForm->get('userCancel')->isClicked() )
-                {
-                    $success = $registrationService->cancel($meetup, $user);
-
-                    if ( $success )
-                        $this->addFlash('success', 'Désistement réussi');
-                    else
-                        $this->addFlash('warning', 'Désistement échoué');
-                }
-                else if (
-                    $detailsForm->get('cancel')->isClicked()
-                    && $detailsForm->isValid()
-                ) {
-                    $success = $cancellationService->cancel($meetup);
-
-                    if ( $success )
-                        $this->addFlash('success', 'Annulation réussie');
-                    else
-                        $this->addFlash('warning', 'Annulation échouée');
+                    case 'userRegister':
+                        $registrationService->register($meetup, $user, $flash);
+                        break;
+                    case 'userCancel':
+                        $registrationService->cancel($meetup, $user, $flash);
+                        break;
+                    case 'cancel':
+                        if ( $detailsForm->isValid() )
+                            $cancellationService->cancel($meetup, flash: $flash);
+                        break;
+                    default:
                 }
             }
 
