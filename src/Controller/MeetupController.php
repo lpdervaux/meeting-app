@@ -189,7 +189,7 @@ class MeetupController extends AbstractController
                 ]
             ])
             ->add('coordinator', CheckboxType::class, [
-                'label' => 'Sorties dont je suis l\'organisateur/trice : ',
+                'label' => 'Sorties dont je suis l\'organisateur·trice',
                 'required' => false,
                 'attr' => [
                     'checked' =>
@@ -199,7 +199,7 @@ class MeetupController extends AbstractController
                 ]
             ])
             ->add('registered', CheckboxType::class, [
-                'label' => 'Sorties auxquelles je suis inscrit/e : ',
+                'label' => 'Sorties auxquelles je suis inscrit·e',
                 'required' => false,
                 'attr' => [
                     'checked' =>
@@ -209,7 +209,7 @@ class MeetupController extends AbstractController
                 ]
             ])
             ->add('no_registered', CheckboxType::class, [
-                'label' => 'Sorties auxquelles je ne suis pas inscrit/e : ',
+                'label' => 'Sorties auxquelles je ne suis pas inscrit·e',
                 'required' => false,
                 'attr' => [
                     'checked' =>
@@ -219,7 +219,7 @@ class MeetupController extends AbstractController
                 ]
             ])
             ->add('past', CheckboxType::class, [
-                'label' => 'Sorties passées : ',
+                'label' => 'Sorties passées',
                 'required' => false,
                 'attr' => [
                     'checked' =>
