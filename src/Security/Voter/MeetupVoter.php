@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Security\Voter;
 
 use App\Entity\Meetup;
@@ -12,13 +14,15 @@ class MeetupVoter
     extends Voter
     implements CacheableVoterInterface
 {
+    public const VIEW = 'view';
     public const CANCEL = 'cancel';
 
     public function __construct (readonly private Security $security) {}
 
     public function supportsAttribute (string $attribute) : bool
     {
-        return ( $attribute === self::CANCEL );
+        return ( $attribute === self::VIEW )
+            || ( $attribute === self::CANCEL );
     }
 
     public function supportsType (string $subjectType) : bool
@@ -28,7 +32,7 @@ class MeetupVoter
 
     protected function supports (string $attribute, mixed $subject): bool
     {
-        return $attribute === self::CANCEL
+        return $this->supportsAttribute($attribute)
             && $subject instanceof Meetup;
     }
 
@@ -40,7 +44,14 @@ class MeetupVoter
     {
         $user = $token->getUser();
 
-        return ( $user === $subject->getCoordinator() )
-            || ( $this->security->isGranted('ROLE_ADMINISTRATOR') );
+        return match ( $attribute )
+        {
+            self::VIEW =>
+                ( $subject->getEnd() < (new \DateTimeImmutable())->modify('-1 month') ),
+            self::CANCEL =>
+                ($user === $subject->getCoordinator())
+                || ($this->security->isGranted('ROLE_ADMINISTRATOR')),
+            default => false
+        };
     }
 }

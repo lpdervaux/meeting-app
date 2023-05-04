@@ -257,7 +257,7 @@ class MeetupController extends AbstractController
             ->getEnd()
             ->add(new \DateInterval('P1M'));
 
-        if ( $now > $oneMonthFromEnd )
+        if ( $this->isGranted('view', $meetup) )
             $response = $this->render('meetup/archived.html.twig');
         else
         {
