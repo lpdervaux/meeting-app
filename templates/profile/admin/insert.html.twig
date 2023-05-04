@@ -3,10 +3,10 @@
     {% if error != null %}
             <div class="alert alert-success">{{ error }}</div>
     {% endif %}
-    <div class="col-md-3">
+    <div class="col-md-3 ms-5" >
         {{ form_start(form) }}
         {{ form_widget(form) }}
-        <button type="submit">Valider</button>
+        <button class="btn btn-lg btn-primary" type="submit">Valider</button>
         {{ form_end(form) }}
     </div>
 {% endblock %}
