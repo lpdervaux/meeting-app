@@ -223,7 +223,7 @@ class UserController extends AbstractController
                 'constraints' =>
                     new File([
                         'mimeTypes' => [
-                            'text' => 'text/csv',
+                            'txt' => 'text/csv',
                         ],
                 ])
             ])
