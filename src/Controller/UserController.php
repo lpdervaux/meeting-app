@@ -220,8 +220,12 @@ class UserController extends AbstractController
                 'mapped' => false,
                 'label'=> 'Insérer votre fichier csv',
                 'required' => true,
-                'attr' => [
-                    'accept' => 'text/csv'
+                'constraint' => [
+                    new File([
+                        'mimeTypes' => [
+                            'txt' => 'text/csv'
+                        ]
+                    ])
                 ]
             ])
             ->getForm();
@@ -234,11 +238,22 @@ class UserController extends AbstractController
             /** @var UploadedFile $brochureFile */
             $file = $form->get('insert')->getData();
 
+
             if ($file)
             {
                 $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+                if($file->guessExtension() == 'txt')
+                {
+                    $newFilename = str_replace('.txt','.csv',$newFilename);
+                }
+
+                if($file->guessExtension() == 'zip')
+                {
+                    $newFilename = str_replace('.zip','.csv',$newFilename);
+                }
 
                 try {
                     $file->move(
