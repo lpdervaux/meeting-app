@@ -51,12 +51,14 @@
                     </div>
                     <div class="col-md-3">
                         {{ form_widget(form.start, {'attr': {'class':'form-control'}}) }}
+                        {{ form_errors(form.start) }}
                     </div>
                     <div class="col-md-2 mt-auto mb-auto">
                         {{ form_label(form.end) }}
                     </div>
                     <div class="col-md-3">
                         {{ form_widget(form.end, {'attr': {'class':'form-control'}}) }}
+                        {{ form_errors(form.end) }}
                     </div>
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary" name="research_button" value="true">Rechercher</button>
