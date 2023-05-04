@@ -46,7 +46,7 @@ class Meetup
     private ?Campus $campus = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull]
     private ?User $coordinator = null;
 

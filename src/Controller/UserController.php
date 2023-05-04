@@ -166,7 +166,7 @@ class UserController extends AbstractController
         $entityManager->remove($user);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Utilisateur supprimer avec succès !');
+        $this->addFlash('success', 'Utilisateur supprimé avec succès !');
 
         return $this->redirectToRoute('app_user_list');
     }
