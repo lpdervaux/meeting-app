@@ -59,8 +59,6 @@ class CampusRepository extends ServiceEntityRepository
             }
         }
         return $campusAndNo;
-
-       // return $query->getResult()[0];
     }
 
     public function findNameByNo($no)
@@ -78,11 +76,8 @@ class CampusRepository extends ServiceEntityRepository
                 $name = $value->getName();
             }
         }
-
         return $name;
-
     }
-
 
 
 //    /**

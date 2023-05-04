@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Campus;
 use App\Entity\User;
 use App\Form\UserType;
+use App\Repository\CampusRepository;
 use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,7 +13,10 @@ use Knp\Component\Pager\PaginatorInterface;
 use mysql_xdevapi\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -19,6 +24,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Constraints\File;
+use Vich\UploaderBundle\Form\Type\VichFileType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @method getDoctrine()
@@ -191,35 +200,109 @@ class UserController extends AbstractController
     }
 
     #[Route('/insert', name: 'app_user_insert')]
-    public function insert(EntityManagerInterface $entityManager, UserRepository $userRepository): Response
+    public function insert(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, UserRepository $userRepository, CampusRepository $campusRepository,UserPasswordHasherInterface $passwordHasher , RoleRepository $roleRepository): Response
     {
         $error = null;
         $userAttributes =
             [
-                'nickname',
-                'name',
-                'surname',
-                'phoneNumber',
-                'email',
-                'password',
-                'campus'
+                'nickname'    => '#^[a-zA-Z]{1,100}$#',
+                'name'        => '#^[a-zA-Z]{1,100}$#',
+                'surname'     => '#^[a-zA-Z]{1,100}$#',
+                'phoneNumber' => '#^(0|\+33)[1-9]( *[0-9]{2}){4}$#',
+                'email'       => '#^[\w\-\.]+@([\w-]+\.)+[\w-]{2,4}$#',
+                'password'    => '#^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$#',
+                'campus'      => '#^[a-zA-Z]{1,255}#'
             ];
 
-        $file = "../data/test.csv";
-        $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
-        $normalizers = [new ObjectNormalizer()];
-        $encoder = [
-            new CsvEncoder()
-        ];
-        $serializer = new Serializer($normalizers, $encoder);
-        $fileString = file_get_contents($file);
-        $data = $serializer->decode($fileString, $fileExtension);
 
-        $error = $this->checkColumnName($userAttributes,$data)
-            .$this->checkColumnName($userAttributes,$data);
+        $form = $this->createFormBuilder()
+            ->add('insert', FileType::class, [
+                'mapped' => false,
+                'label'=> 'Insérer votre fichier csv',
+                'required' => true,
+                'constraints' =>
+                    new File([
+                        'mimeTypes' => [
+                            'text/csv',
+                        ],
+                ])
+            ])
+            ->getForm();
+
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            /** @var UploadedFile $brochureFile */
+            $file = $form->get('insert')->getData();
+
+            if ($file)
+            {
+                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+                try {
+                    $file->move(
+                        $this->getParameter('file_csv_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+
+                }
+
+                $file = "../data/".$newFilename;
+                $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
+                $normalizers = [new ObjectNormalizer()];
+                $encoder = [
+                    new CsvEncoder()
+                ];
+                $serializer = new Serializer($normalizers, $encoder);
+                $fileString = file_get_contents($file);
+                $data = $serializer->decode($fileString, $fileExtension);
+
+
+                $error = $this->checkColumnName($userAttributes,$data);
+
+                if($error == null)
+                {
+                    $error = $this->checkTableContents($userAttributes, $data, $userRepository , $campusRepository, $passwordHasher);
+
+                    if($error == null)
+                    {
+                        $this->addUsers($data, $entityManager, $campusRepository, $passwordHasher, $roleRepository);
+                        if(file_exists($file))
+                        {
+                            dump($file." supprimé");
+                            unlink($file);
+                        }
+
+                    }
+                    else
+                    {
+                        if(file_exists($file))
+                        {
+                            dump($file." supprimé");
+                            unlink($file);
+                        }
+                    }
+                }
+                else
+                {
+                    if(file_exists($file))
+                    {
+                        dump($file." supprimé");
+                        unlink($file);
+                    }
+                }
+
+            }
+        }
 
         return $this->render('profile/admin/insert.html.twig', [
-            'error' => $error
+            'error' => $error,
+            'form' => $form
         ]);
 
     }
@@ -227,16 +310,17 @@ class UserController extends AbstractController
     private function checkColumnName($userAttributes, $data)
     {
         $counter= 0;
-        $error = 'Les colonnes de votre tableau doivent contenir :';
-        foreach ($userAttributes as $ua) {$error = $error.", ".$ua;}
-        $error = $error.'. Il vous manque : ';
+        $error = 'Les colonnes de votre tableau doivent contenir : ';
+        foreach ($userAttributes as $key=>$ua) {$error = $error.$key.", ";}
+        $error=substr_replace($error, '. ', strlen($error)-2, 2 );
+        $error = $error.'Il vous manque : ';
 
         foreach($userAttributes as $key1 => $ua)
         {
             $check = false;
             foreach($data[0] as $key2 => $d)
             {
-                if(strtolower(trim($ua)) == strtolower(trim($key2)) )
+                if(strtolower(trim($key1)) == strtolower(trim($key2)) )
                 {
                     $counter++;
                     $check = true;
@@ -244,7 +328,7 @@ class UserController extends AbstractController
             }
             if(!$check)
             {
-                $error= $error.$ua.", ";
+                $error= $error.$key1.", ";
             }
         }
 
@@ -254,9 +338,114 @@ class UserController extends AbstractController
         else return $error;
     }
 
-    private function checkTableContents()
-    {
 
+    private function checkTableContents($usersAttributes, $data, UserRepository $userRepository, CampusRepository $campusRepository)
+    {
+        $globalCounter=0;
+        $nicknameAndEmailsBDD = $userRepository->findAllNicknameAndEmail();
+        $campusBDD = $campusRepository->findAll();
+        //dd($campusBDD);
+        $error = 'Votre tableau contient des erreurs. ';
+        for($i = 0 ; $i<count($data) ; $i++)
+        {
+            $counter1 = 0;
+            foreach($data[$i] as $key=>$value)
+            {
+                if(!preg_match($usersAttributes[$key], $value))
+                {
+                    $error = $error.' Ligne '.($i+1).', '.$key.' : "'.$value.'"  est invalide | ';
+                }
+                else
+                {
+                    $check = true;
+                    if($key == 'email')
+                    {
+                        for($k = 0 ; $k < count($nicknameAndEmailsBDD) ; $k++ )
+                        {
+                            if($nicknameAndEmailsBDD[$k]['email'] == $value)
+                            {
+                                $check = false;
+                                $error = $error.' Ligne '.($i+1).', '.$key.' : "'.$value.'" est déjà utilisé | ';
+                            }
+                        }
+
+                    }
+                    if($key == 'nickname')
+                    {
+                        for($k = 0 ; $k < count($nicknameAndEmailsBDD) ; $k++ )
+                        {
+                            if($nicknameAndEmailsBDD[$k]['nickname'] == $value)
+                            {
+                                $check = false;
+                                $error = $error.' Ligne '.($i+1).', '.$key.' : "'.$value.'" est déjà utilisé | ';
+                            }
+                        }
+                    }
+                    if($key == 'campus')
+                    {
+                        $exist = false;
+                        for($k = 0 ; $k < count($campusBDD) ; $k++ )
+                        {
+                            if($campusBDD[$k]->getName() == $value)
+                            {
+                                $exist = true;
+                            }
+                        }
+                        if(!$exist) {
+                            $error = $error.' Ligne '.($i+1).', '.$key.' : "'.$value.'" n\'existe pas | ';
+                            $check = false;
+                        }
+
+                    }
+
+                    if($check)
+                    {
+                        $counter1++;
+                    }
+                }
+            }
+            if($counter1 == count($data[$i]))
+            {
+                $globalCounter++;
+            };
+        }
+
+        $error=substr_replace($error, '. ', strlen($error)-3, 3 );
+
+        if($globalCounter == count($data)) return null;
+        else return $error;
+    }
+
+    private function addUsers($data,EntityManagerInterface $entityManager, CampusRepository $campusRepository, UserPasswordHasherInterface $passwordHasher, RoleRepository $roleRepository )
+    {
+        $campusBDD = $campusRepository->findAll();
+        for($i = 0 ; $i<count($data) ; $i++)
+        {
+            $user = new User();
+            $user
+                ->setNickname($data[$i]['nickname'])
+                ->setName($data[$i]['name'])
+                ->setSurname($data[$i]['surname'])
+                ->setPhoneNumber($data[$i]['phoneNumber'])
+                ->setEmail($data[$i]['email']);
+
+                $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);
+                $user->addRole($userRole);
+
+                $hashedPassword = $passwordHasher->hashPassword($user, $data[$i]['password']);
+                $user->setPassword($hashedPassword);
+
+
+            for($k = 0 ; $k < count($campusBDD) ; $k++ )
+            {
+                if($campusBDD[$k]->getName() == $data[$i]['campus'])
+                {
+                    $user->setCampus($campusBDD[$k]);
+                }
+            }
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
     }
 
 

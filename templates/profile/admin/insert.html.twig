@@ -1,6 +1,12 @@
 {% extends 'base.html.twig' %}
 {% block body %}
     {% if error != null %}
-        {{ error }}
+            <div class="alert alert-success">{{ error }}</div>
     {% endif %}
+    <div class="col-md-3">
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit">Valider</button>
+        {{ form_end(form) }}
+    </div>
 {% endblock %}

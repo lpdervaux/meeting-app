@@ -32,6 +32,7 @@
                         <li><a class="dropdown-item" href="{{ path('app_user_profile', { 'id' : app.user.id }) }}">Mon Profil</a></li>
                         {% if is_granted('ROLE_ADMINISTRATOR') %}
                             <li><a class="dropdown-item" href="{{ path('app_user_new') }}">Créer un utilisateur</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_user_insert') }}">Ajouter une liste d'utilisateurs</a></li>
                             <li><a class="dropdown-item" href="{{ path('app_user_list') }}">Profil des utilisateurs</a></li>
                         {% endif %}
                     </ul>

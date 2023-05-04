@@ -112,4 +112,14 @@ class UserRepository
             ->setParameter('identifier', $identifier)
             ->getOneOrNullResult();
     }
+
+    public function findAllNicknameAndEmail()
+    {
+        $qb = $this -> createQueryBuilder('user')
+            ->select('user.nickname, user.email');
+
+        $query = $qb->getQuery();
+        return $query->getResult();
+    }
+
 }
