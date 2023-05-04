@@ -3,8 +3,11 @@
 {% block title %}Ajouter une liste d'utilisateur{% endblock %}
 
 {% block body %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
     {% if error is not null %}
-        <div class="alert alert-success">{{ error }}</div>
+        <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
     <div class="container">
         <div class="row justify-content-center align-items-center">

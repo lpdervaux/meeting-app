@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Campus;
+use App\Entity\Role;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\CampusRepository;
@@ -171,7 +172,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/profile/{id}/ban', name: 'app_user_ban', methods: ['POST'])]
-    public function ban(EntityManagerInterface $entityManager, UserRepository $userRepository, int $id): Response
+    public function ban(EntityManagerInterface $entityManager, UserRepository $userRepository,RoleRepository $roleRepository, int $id): Response
     {
         $user = $userRepository->find($id);
         if (!$user) {
@@ -181,8 +182,11 @@ class UserController extends AbstractController
 
             return $this->redirectToRoute('app_user_list');
         }
+        $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);
+        $user->removeRole($userRole);////////
 
         $user->setActive(false);
+        $entityManager->persist($user);////////
         $entityManager->flush();
         $this->addFlash('success', 'Utilisateur banni avec succès !');
 
@@ -190,11 +194,16 @@ class UserController extends AbstractController
     }
 
     #[Route('/profile/{id}/unban', name: 'app_user_unban', methods: ['POST'])]
-    public function unban(User $user, EntityManagerInterface $entityManager): Response
+    public function unban(UserRepository $userRepository, EntityManagerInterface $entityManager,RoleRepository $roleRepository, int $id): Response
     {
+        $user = $userRepository->find($id);/////
+        $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);////
+        $user->addRole($userRole);////
         $user->setActive(true);
+        $entityManager->persist($user);////////
         $entityManager->flush();
         $this->addFlash('success', 'L\'utilisateur a été réactivé avec succès !');
+
 
         return $this->redirectToRoute('app_user_list');
     }
@@ -206,8 +215,8 @@ class UserController extends AbstractController
         $userAttributes =
             [
                 'nickname'    => '#^[a-zA-Z]{1,100}$#',
-                'name'        => '#^[a-zA-Z]{1,100}$#',
-                'surname'     => '#^[a-zA-Z]{1,100}$#',
+                'name'        => '#^[a-zA-Zéèàçù]{1,100}$#',
+                'surname'     => '#^[a-zA-Zéèàçù]{1,100}$#',
                 'phoneNumber' => '#^(0|\+33)[1-9]( *[0-9]{2}){4}$#',
                 'email'       => '#^[\w\-\.]+@([\w-]+\.)+[\w-]{2,4}$#',
                 'password'    => '#^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$#',
@@ -275,7 +284,7 @@ class UserController extends AbstractController
 
                 if($error == null)
                 {
-                    $error = $this->checkTableContents($userAttributes, $data, $userRepository , $campusRepository, $passwordHasher);
+                    $error = $this->checkTableContents($userAttributes, $data, $userRepository , $campusRepository);
 
                     if($error == null)
                     {
@@ -285,7 +294,7 @@ class UserController extends AbstractController
                             dump($file." supprimé");
                             unlink($file);
                         }
-
+                        $this->addFlash('success', 'Les utilisateurs ont été créés avec succès !');
                     }
                     else
                     {
