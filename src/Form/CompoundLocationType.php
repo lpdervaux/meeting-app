@@ -5,96 +5,50 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Location;
-use App\Validator\CompoundLocationConstraint;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CompoundLocationType
-    extends AbstractType
-    implements DataMapperInterface
+class CompoundLocationType extends CompoundEntityType
 {
-    public const LIST_PROPERTY_PATH = 'location';
-    public const NEW_PROPERTY_PATH = 'new_location';
+    public const ENTITY_NULL = __CLASS__ . 'null';
+    public const ENTITY_PARTIAL = __CLASS__ . 'partial';
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    protected const NULL_MESSAGE = 'Please select a location';
+
+    public function buildForm (FormBuilderInterface $builder, array $options) : void
     {
+        parent::buildForm($builder, $options);
+
         $builder
             ->add(
-                'location',
+                $this::NAME_LIST,
                 EntityType::class,
                 [
                     'class' => 'App\Entity\Location',
                     'choice_label' => 'name',
-                    'placeholder' => '',
-                    'required' => false,
-                    'property_path' => self::LIST_PROPERTY_PATH
+                    ... $this->getListOptions()
                 ]
             )
             ->add(
-                'newLocation',
+                $this::NAME_NEW,
                 LocationType::class,
-                [
-                    'required' => false,
-                    'property_path' => self::NEW_PROPERTY_PATH
-                ]
-            )
-            ->setDataMapper($this)
-        ;
+                [ ... $this->getNewOptions() ]
+            );
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
+    public function configureOptions (OptionsResolver $resolver) : void
     {
-        $resolver->setDefaults([
-            'data_class' => Location::class,
-            'compound' => true,
-            'error_bubbling' => true,
-            'label' => '',
-            'constraints' => [ new CompoundLocationConstraint() ]
-        ]);
+        parent::configureOptions($resolver);
+        $resolver->setDefaults([ 'data_class' => Location::class ]);
     }
 
-    public function mapDataToForms (mixed $viewData, \Traversable $forms) : void
+    protected function isPartial (mixed $entity) : bool
     {
-        if ( $viewData )
-        {
-            /** @var FormInterface[] $forms */
-            $forms = iterator_to_array($forms);
-
-            $location = $forms['location'];
-            $newLocation = $forms['newLocation'];
-
-            if ( $viewData->getId() )
-                $location->setData($viewData);
-            else
-                $newLocation->setData($viewData);
-        }
-    }
-
-    public function mapFormsToData (\Traversable $forms, mixed &$viewData) : void
-    {
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-
-        $locationFormData = $forms['location']->getData();
-        $newLocationFormData = $forms['newLocation']->getData();
-
-        if ( $locationFormData )
-            $viewData = $locationFormData;
-        else if (
-            $newLocationFormData
-            && (
-                $newLocationFormData->getName()
-                || $newLocationFormData->getAddress()
-                || $newLocationFormData->getLatitude()
-                || $newLocationFormData->getLongitude()
-            )
-        )
-            $viewData = $newLocationFormData;
-        else
-            $viewData = null;
+        return ( $entity->getName() )
+            || ( $entity->getAddress() )
+            || ( $entity->getLatitude() )
+            || ( $entity->getLongitude() )
+            || ( $entity->getCity() );
     }
 }

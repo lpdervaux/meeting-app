@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Campus;
+use App\Form\CompoundCityType;
+use App\Form\CompoundLocationType;
 use App\Repository\CampusRepository;
 use App\Repository\MeetupRepository;
 use App\Service\MeetupCancellationService;
 use App\Service\MeetupRegistrationService;
-use App\Validator\CompoundCityConstraint;
-use App\Validator\CompoundLocationConstraint;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -29,8 +29,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\When;
-
-
 
 #[Route('/meetup', name : 'app_meetup')]
 class MeetupController extends AbstractController
@@ -275,34 +273,22 @@ class MeetupController extends AbstractController
             $detailsForm->handleRequest($request);
             if ( $detailsForm->isSubmitted() )
             {
-                if ( $detailsForm->get('userRegister')->isClicked() )
+                $clicked = $detailsForm->getClickedButton()?->getName();
+                $flash = $request->getSession()->getFlashBag();
+
+                switch ( $clicked )
                 {
-                    $success = $registrationService->register($meetup, $user);
-
-                    if ( $success )
-                        $this->addFlash('success', 'Inscription réussie');
-                    else
-                        $this->addFlash('warning', 'Inscription échouée');
-                }
-                else if ( $detailsForm->get('userCancel')->isClicked() )
-                {
-                    $success = $registrationService->cancel($meetup, $user);
-
-                    if ( $success )
-                        $this->addFlash('success', 'Désistement réussi');
-                    else
-                        $this->addFlash('warning', 'Désistement échoué');
-                }
-                else if (
-                    $detailsForm->get('cancel')->isClicked()
-                    && $detailsForm->isValid()
-                ) {
-                    $success = $cancellationService->cancel($meetup);
-
-                    if ( $success )
-                        $this->addFlash('success', 'Annulation réussie');
-                    else
-                        $this->addFlash('warning', 'Annulation échouée');
+                    case 'userRegister':
+                        $registrationService->register($meetup, $user, $flash);
+                        break;
+                    case 'userCancel':
+                        $registrationService->cancel($meetup, $user, $flash);
+                        break;
+                    case 'cancel':
+                        if ( $detailsForm->isValid() )
+                            $cancellationService->cancel($meetup, flash: $flash);
+                        break;
+                    default:
                 }
             }
 
@@ -360,23 +346,23 @@ class MeetupController extends AbstractController
         else
         {
             $errors = $form->getErrors(true);
-            $newCityErrors = $errors->findByCodes(CompoundCityConstraint::PARTIAL_ENTITY_CODE);
-            $newCityInvalid = ( $newCityErrors->count() > 0 );
+            $newCityErrors = $errors->findByCodes(CompoundCityType::ENTITY_PARTIAL);
+            $partialCity = ( $newCityErrors->count() > 0 );
 
-            if ( $newCityInvalid )
-                $newLocationInvalid = true;
+            if ( $partialCity )
+                $partialLocation = true;
             else
             {
-                $newLocationErrors = $errors->findByCodes(CompoundLocationConstraint::PARTIAL_ENTITY_CODE);
-                $newLocationInvalid = ( $newLocationErrors->count() > 0 );
+                $newLocationErrors = $errors->findByCodes(CompoundLocationType::ENTITY_PARTIAL);
+                $partialLocation = ( $newLocationErrors->count() > 0 );
             }
 
             $response = $this->render(
                 'meetup/new.html.twig',
                 [
                     'newMeetupFormView' => $form->createView(),
-                    'showNewLocation' => $newLocationInvalid,
-                    'showNewCity' => $newCityInvalid
+                    'showNewLocation' => $partialLocation,
+                    'showNewCity' => $partialCity
                 ]
             );
         }

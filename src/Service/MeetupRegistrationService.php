@@ -9,6 +9,7 @@ use App\Entity\MeetupStatus;
 use App\Entity\User;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 readonly class MeetupRegistrationService
 {
@@ -29,14 +30,34 @@ readonly class MeetupRegistrationService
             && ( $meetup->getAttendees()->contains($user) );
     }
 
-    public function register (Meetup $meetup, User $user) : bool
+    public function register (Meetup $meetup, User $user, ?FlashBagInterface $flash = null) : bool
     {
-        return $this->lock($meetup, fn (Meetup $refresh) => $this->registerUser($refresh, $user));
+        $success = $this->lock($meetup, fn (Meetup $refresh) => $this->registerUser($refresh, $user));
+
+        if ( $flash )
+        {
+            if ( $success )
+                $flash->add('success', "{$meetup->getName()} : Inscription de {$user->getName()} {$user->getSurname()}");
+            else
+                $flash->add('warning', "{$meetup->getName()} : Inscription échouée");
+        }
+
+        return $success;
     }
 
-    public function cancel (Meetup $meetup, User $user) : bool
+    public function cancel (Meetup $meetup, User $user, ?FlashBagInterface $flash = null) : bool
     {
-        return $this->lock($meetup, fn (Meetup $refresh) => $this->cancelUser($refresh, $user));
+        $success = $this->lock($meetup, fn (Meetup $refresh) => $this->cancelUser($refresh, $user));
+
+        if ( $flash )
+        {
+            if ( $success )
+                $flash->add('success', "{$meetup->getName()} : Désinscription de {$user->getName()} {$user->getSurname()}");
+            else
+                $flash->add('warning', "{$meetup->getName()} : Désinscription échouée");
+        }
+
+        return $success;
     }
 
     private function lock (Meetup $meetup, callable $callback) : bool

@@ -97,15 +97,6 @@
                                 <td><a href="{{ path("app_user_profile", {'id': meetup.coordinator.id}) }}">{{ meetup.coordinator.name}}</a></td>
                                 <td>
                                     <a href="{{ path("app_meetup_details", {'id': meetup.id}) }}">Afficher</a>
-                                    {% if registered == 'false' and meetup.status.name == 'Open'%}
-                                        <a href="">S'inscrire</a>
-                                    {% endif %}
-                                    {% if registered == 'true' and (meetup.status.name == 'Open' or meetup.status.name == 'close') %}
-                                        <a href="">Se désister</a>
-                                    {% endif %}
-                                    {% if (meetup.coordinator == app.user or is_granted('ROLE_ADMINISTRATOR')) and (meetup.status.name == 'Open' or  meetup.status.name=='Scheduled') %}
-                                        <a href="">Modifier</a>
-                                    {% endif %}
                                 </td>
                             </tr>
                      {% endfor %}
