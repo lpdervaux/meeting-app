@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 class MeetupType extends AbstractType
 {
@@ -50,7 +51,8 @@ class MeetupType extends AbstractType
                 'registrationEnd',
                 options: [
                     'widget' => 'single_text',
-                    'label' => 'Clôture des inscriptions'
+                    'label' => 'Clôture des inscriptions',
+                    'constraints' => new GreaterThanOrEqual(value: new \DateTimeImmutable())
                 ]
             )
             ->add(
