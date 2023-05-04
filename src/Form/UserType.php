@@ -51,6 +51,7 @@ class UserType extends AbstractType
                 // instead of being set onto the object directly,
                 // this is read and encoded in the controller
                 'type' => PasswordType::class,
+                'invalid_message' => 'Les mots de passe ne correspondent pas',
                 'required' => false,
                 'mapped' => false,
                 'constraints' => new When(

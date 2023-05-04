@@ -1,0 +1,16 @@
+{% extends 'singlecard.html.twig' %}
+
+{% block title %}Réinitialisation de mot de passe{% endblock %}
+
+{% block card_header %}
+    <h1 class="h2 text-center">Réinitialisation de mot de passe</h1>
+{% endblock %}
+
+{% block card_body %}
+    {{ form_start(resetForm) }}
+        {{ form_row(resetForm.plainPassword) }}
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-primary">Réinitialiser</button>
+        </div>
+    {{ form_end(resetForm) }}
+{% endblock %}

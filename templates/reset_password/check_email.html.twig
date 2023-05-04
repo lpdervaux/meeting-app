@@ -1,0 +1,12 @@
+{% extends 'singlecard.html.twig' %}
+
+{% block title %}Email envoyé{% endblock %}
+
+{% block card_header %}
+    <h1 class="h2 text-center">Email envoyé</h1>
+{% endblock %}
+
+{% block card_body %}
+    <p>Un message contenant un lien de réinitialisation a été envoyé. Ce lien expirera dans 1 heure.</p>
+    <p>En cas de non réception, regardez dans les messages indésirables ou <a href="{{ path('app_forgot_password_request') }}">essayez à nouveau</a>.</p>
+{% endblock %}

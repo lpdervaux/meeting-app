@@ -13,6 +13,8 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
+            pattern: ^/
+            user_checker: App\Security\UserChecker
             lazy: true
             provider: app_user_provider
             form_login:
@@ -37,6 +39,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: '^/login', roles: PUBLIC_ACCESS }
+        - { path: '^/reset-password', roles: PUBLIC_ACCESS }
         - { path: '^/new$', roles: ROLE_ADMINISTRATOR }
         - { path: '^/profile$', roles: ROLE_ADMINISTRATOR }
         - { path: '^/', roles: ROLE_USER }
