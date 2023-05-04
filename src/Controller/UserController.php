@@ -220,7 +220,7 @@ class UserController extends AbstractController
                 'mapped' => false,
                 'label'=> 'Insérer votre fichier csv',
                 'required' => true,
-                'constraint' => [
+                'constraints' => [
                     new File([
                         'mimeTypes' => [
                             'txt' => 'text/csv'
