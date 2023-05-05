@@ -306,43 +306,65 @@ class UserController extends AbstractController
                 ];
                 $serializer = new Serializer($normalizers, $encoder);
                 $fileString = file_get_contents($file);
-                $data = $serializer->decode($fileString, $fileExtension);
 
-
-                $error = $this->checkColumnName($userAttributes,$data);
-
-                if($error == null)
+                if($fileString == null)
                 {
-                    $error = $this->checkTableContents($userAttributes, $data, $userRepository , $campusRepository);
+                    $error = 'Les colonnes de votre tableau doivent contenir : ';
+                    foreach ($userAttributes as $key=>$ua) {$error = $error.$key.", ";}
+                    $error=substr_replace($error, '. ', strlen($error)-2, 2 );
 
-                    if($error == null)
-                    {
-                        $this->addUsers($data, $entityManager, $campusRepository, $passwordHasher, $roleRepository);
-                        if(file_exists($file))
-                        {
-                            dump($file." supprimé");
-                            unlink($file);
-                        }
-                        $this->addFlash('success', 'Les utilisateurs ont été créés avec succès !');
-                    }
-                    else
-                    {
-                        if(file_exists($file))
-                        {
-                            dump($file." supprimé");
-                            unlink($file);
-                        }
-                    }
                 }
                 else
                 {
-                    if(file_exists($file))
+                    if($error == null)
                     {
-                        dump($file." supprimé");
-                        unlink($file);
+                        $data = $serializer->decode($fileString, $fileExtension);
+
+                        $index = 0;
+                        foreach ($userAttributes as $key=>$value)
+                        {
+                            if($index == 0) $error = $error."Pas de données pour : ";
+                            if(empty($data[0][$key])) $error = $error.$key.", ";
+                            $index++;
+                            if($index == count($userAttributes)) $error=substr_replace($error, '. ', strlen($error)-2, 2 );
+                        }
+
+                        if($error == null)
+                        {
+
+                            $error = $this->checkColumnName($userAttributes,$data);
+
+                            if($error == null)
+                            {
+                                $error = $this->checkTableContents($userAttributes, $data, $userRepository , $campusRepository);
+
+                                if($error == null)
+                                {
+                                    $this->addUsers($data, $entityManager, $campusRepository, $passwordHasher, $roleRepository);
+                                    if(file_exists($file))
+                                    {
+                                        unlink($file);
+                                    }
+                                    $this->addFlash('success', 'Les utilisateurs ont été créés avec succès !');
+                                }
+                                else
+                                {
+                                    if(file_exists($file))
+                                    {
+                                        unlink($file);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if(file_exists($file))
+                                {
+                                    unlink($file);
+                                }
+                            }
+                        }
                     }
                 }
-
             }
         }
 
