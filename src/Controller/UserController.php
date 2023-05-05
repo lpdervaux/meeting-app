@@ -15,6 +15,7 @@ use mysql_xdevapi\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -29,6 +30,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Validator\Constraints\File;
 use Vich\UploaderBundle\Form\Type\VichFileType;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\Extension\Core\Type;
 
 /**
  * @method getDoctrine()
@@ -38,17 +40,44 @@ class UserController extends AbstractController
     #[Route('/profile', name: 'app_user_list')]
     public function list(UserRepository $userRepository, PaginatorInterface $paginator, Request $request): Response
     {
-        $query = $userRepository->createQueryBuilder('u')
-            ->orderBy('u.nickname', 'ASC')
-            ->getQuery();
+        $pagination=null;
+        $form = $this->createFormBuilder()
+            ->add('research', TextType::class, [
+                'attr' => [
+                    'placeholder' => 'Rechercher un utilisateur par mot clé...'
+                ]
+            ])
+            ->getForm();
 
-        $pagination = $paginator->paginate(
-            $query,
-            $request->query->getInt('page', 1),
-            20
-        );
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $word = $form->getData()['research'];
+            $userList = $userRepository->findByKey($word);
+
+            $pagination = $paginator->paginate(
+                $userList,
+                $request->query->getInt('page', 1),
+                20
+            );
+        }
+        else
+        {
+            $query = $userRepository->createQueryBuilder('u')
+                ->orderBy('u.nickname', 'ASC')
+                ->getQuery();
+
+            $pagination = $paginator->paginate(
+                $query,
+                $request->query->getInt('page', 1),
+                20
+            );
+
+        }
 
         return $this->render('profile/admin/list.html.twig', [
+            'form' => $form,
             'pagination' => $pagination,
             'current_page' => $pagination->getCurrentPageNumber(),
         ]);

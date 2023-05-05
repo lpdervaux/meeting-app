@@ -122,4 +122,14 @@ class UserRepository
         return $query->getResult();
     }
 
+
+    public function findByKey($research)
+    {
+        $qb = $this -> createQueryBuilder('user')
+            ->where('user.nickname LIKE :research')
+            ->setParameter('research', "%{$research}%");
+        $query = $qb->getQuery();
+        return $query->getResult();
+    }
+
 }

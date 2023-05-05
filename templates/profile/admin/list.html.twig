@@ -10,6 +10,16 @@
     {% endfor %}
     <div class="container">
         <h1>Liste des utilisateurs</h1>
+        {{ form_start(form) }}
+        <div class="row mb-4 mt-4">
+            <div class="col mt-auto mb-auto">
+                {{ form_widget(form.research) }}
+            </div>
+            <div class="col mt-auto mb-auto">
+                <button type="submit" class="btn btn-lg btn-primary">Rechercher</button>
+            </div>
+        </div>
+        {{ form_end(form) }}
         <div class="row">
             {% for user in pagination %}
                 <div class="col-12 mb-3">
