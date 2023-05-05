@@ -241,6 +241,7 @@ class UserController extends AbstractController
     public function insert(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, UserRepository $userRepository, CampusRepository $campusRepository,UserPasswordHasherInterface $passwordHasher , RoleRepository $roleRepository): Response
     {
         $error = null;
+        $file = null;
         $userAttributes =
             [
                 'nickname'    => '#^[a-zA-Z]{1,100}$#',
@@ -341,31 +342,18 @@ class UserController extends AbstractController
                                 if($error == null)
                                 {
                                     $this->addUsers($data, $entityManager, $campusRepository, $passwordHasher, $roleRepository);
-                                    if(file_exists($file))
-                                    {
-                                        unlink($file);
-                                    }
                                     $this->addFlash('success', 'Les utilisateurs ont été créés avec succès !');
-                                }
-                                else
-                                {
-                                    if(file_exists($file))
-                                    {
-                                        unlink($file);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if(file_exists($file))
-                                {
-                                    unlink($file);
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        if(file_exists($file))
+        {
+            unlink($file);
         }
 
         return $this->render('profile/admin/insert.html.twig', [
