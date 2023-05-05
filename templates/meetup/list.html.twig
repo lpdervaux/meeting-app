@@ -34,7 +34,10 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-lg btn-primary" name="research_button" value="true">Rechercher</button>
+            <div class="d-flex gap-4">
+                <button type="submit" class="btn btn-lg btn-primary" name="research_button" value="true">Rechercher</button>
+                <a href="{{ path('app_meetup_new') }}" class="btn btn-lg btn-primary">Créer une sortie</a>
+            </div>
         </div>
     </div>
     {{ form_end(form) }}
@@ -107,6 +110,6 @@
     </div>
 
     <div class="ms-3 mb-3">
-        <a href="{{ path('app_meetup_new') }}" class="btn btn-lg btn-primary">Créer une sortie</a>
+
     </div>
 {% endblock %}
