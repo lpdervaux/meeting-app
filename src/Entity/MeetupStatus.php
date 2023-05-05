@@ -6,10 +6,10 @@ namespace App\Entity;
 
 enum MeetupStatus : string
 {
-    case Scheduled = 'En création';
+    case Scheduled = 'Planifiée';
     case Open = 'Ouverte';
     case Closed = 'Fermée';
     case Ongoing = 'En cours';
-    case Concluded = 'Terminée' ;
-    case Cancelled = 'Annulée' ;
+    case Concluded = 'Terminée';
+    case Cancelled = 'Annulée';
 }
