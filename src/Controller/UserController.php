@@ -244,9 +244,9 @@ class UserController extends AbstractController
         $file = null;
         $userAttributes =
             [
-                'nickname'    => '#^[a-zA-Z]{1,100}$#',
-                'name'        => '#^[a-zA-Zéèàçù]{1,100}$#',
-                'surname'     => '#^[a-zA-Zéèàçù]{1,100}$#',
+                'nickname'    => '#^[a-zA-Z0-9]{1,100}$#',
+                'name'        => '#^[a-zA-Zéèàçù0-9]{1,100}$#',
+                'surname'     => '#^[a-zA-Zéèàçù0-9]{1,100}$#',
                 'phoneNumber' => '#^(0|\+33)[1-9]( *[0-9]{2}){4}$#',
                 'email'       => '#^[\w\-\.]+@([\w-]+\.)+[\w-]{2,4}$#',
                 'password'    => '#^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$#',
