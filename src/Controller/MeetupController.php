@@ -44,12 +44,15 @@ class MeetupController extends AbstractController
         }
 
         $form = $this->generateForm($campusRepository, $session);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             $filters = $form->getData();
+
             $session->set('filters', $filters);
+
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
 
             $form = $this->generateForm($campusRepository, $session);
@@ -91,7 +94,10 @@ class MeetupController extends AbstractController
                         false :
                         $session->get('filters')['past']
             );
+
+
             $session->set('filters', $filters);
+
             $meetupList = $meetupRepository->findWithFilters($filters, $this->getUser());
         }
 
@@ -100,6 +106,12 @@ class MeetupController extends AbstractController
             'meetup_list' => $meetupList
         ]);
     }
+
+
+
+
+
+
 
     private function generateForm($campusRepository, $session)
     {

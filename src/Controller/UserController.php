@@ -212,10 +212,10 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_user_list');
         }
         $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);
-        $user->removeRole($userRole);////////
+        $user->removeRole($userRole);
 
         $user->setActive(false);
-        $entityManager->persist($user);////////
+        $entityManager->persist($user);
         $entityManager->flush();
         $this->addFlash('success', 'Utilisateur banni avec succès !');
 
@@ -225,11 +225,11 @@ class UserController extends AbstractController
     #[Route('/profile/{id}/unban', name: 'app_user_unban', methods: ['POST'])]
     public function unban(UserRepository $userRepository, EntityManagerInterface $entityManager,RoleRepository $roleRepository, int $id): Response
     {
-        $user = $userRepository->find($id);/////
-        $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);////
-        $user->addRole($userRole);////
+        $user = $userRepository->find($id);
+        $userRole = $roleRepository->findOneBy(['role' => 'ROLE_USER']);
+        $user->addRole($userRole);
         $user->setActive(true);
-        $entityManager->persist($user);////////
+        $entityManager->persist($user);
         $entityManager->flush();
         $this->addFlash('success', 'L\'utilisateur a été réactivé avec succès !');
 
@@ -242,6 +242,7 @@ class UserController extends AbstractController
     {
         $error = null;
         $file = null;
+
         $userAttributes =
             [
                 'nickname'    => '#^[a-zA-Z0-9]{1,100}$#',
