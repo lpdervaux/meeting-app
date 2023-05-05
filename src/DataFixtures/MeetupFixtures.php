@@ -19,7 +19,7 @@ class MeetupFixtures
     extends FakerFixtures
     implements DependentFixtureInterface
 {
-    public const COUNT = 100;
+    public const COUNT = 200;
 
     public function __construct (
         FakerService $fakerService,
@@ -43,42 +43,44 @@ class MeetupFixtures
 
         $now = new \DateTimeImmutable();
 
-        $this->fakeSample($now);
+        $this->fakeSample($now, attendee: $this->getReference(UserFixtures::DEFAULT_USER));
+        for ( $i = 0; $i < CampusFixtures::COUNT ; $i++ )
+            $this->fakeSample($now, campus: $this->getReference(CampusFixtures::class . $i));
 
         $this->fakeMany(self::COUNT);
 
         $manager->flush();
     }
 
-    private function fakeSample (\DateTimeImmutable $now) : void
+    private function fakeSample (\DateTimeImmutable $now, mixed ...$options) : void
     {
         $this->fakeMany(
             5,
-            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Scheduled, $now),
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Scheduled, $now, ...$options),
             forget: true
         );
 
         $this->fakeMany(
             5,
-            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Open, $now),
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Open, $now, ...$options),
             forget: true
         );
 
         $this->fakeMany(
             5,
-            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Closed, $now),
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Closed, $now, ...$options),
             forget: true
         );
 
         $this->fakeMany(
             5,
-            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Ongoing, $now),
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Ongoing, $now, ...$options),
             forget: true
         );
 
         $this->fakeMany(
             5,
-            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Concluded, $now),
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Concluded, $now, ...$options),
             forget: true
         );
 
@@ -90,8 +92,9 @@ class MeetupFixtures
             $this->generateStatus(
                 MeetupStatus::Open,
                 $now,
+                ...$options,
                 capacity: 10,
-                attendeeCount: 10
+                attendeeCount: 10,
             ),
             forget: true
         );
@@ -100,11 +103,12 @@ class MeetupFixtures
         $this->fakeMany(
             5,
             entityGenerator:
-            function () use ($now) : Meetup
+            function () use ($now, $options) : Meetup
             {
                 $meetup = $this->generateStatus(
                     MeetupStatus::Open,
                     $now,
+                    ...$options,
                     cancelled: true
                 );
                 $meetup->setCancellationDate(
@@ -123,11 +127,12 @@ class MeetupFixtures
         $this->fakeMany(
             5,
             entityGenerator:
-            function () use ($now) : Meetup
+            function () use ($now, $options) : Meetup
             {
                 $meetup = $this->generateStatus(
                     MeetupStatus::Closed,
                     $now,
+                    ...$options,
                     cancelled: true
                 );
                 $meetup->setCancellationDate(
@@ -157,7 +162,9 @@ class MeetupFixtures
         ?bool $cancelled = null,
         ?\DateTimeImmutable $cancellationDate = null,
         ?string $cancellationReason = null,
+
         ?int $attendeeCount = null,
+        ?User $attendee = null,
 
         ?\DateTimeImmutable $now = null
     ) : Meetup
@@ -223,6 +230,8 @@ class MeetupFixtures
         {
             if ( $attendeeCount > UserFixtures::COUNT )
                 throw new \LogicException('User fixtures cannot support requested attendee count');
+            if ( $attendee )
+                $meetup->addAttendee($attendee);
             while ( $meetup->getAttendees()->count() < $attendeeCount )
             {
                 $meetup->addAttendee(
