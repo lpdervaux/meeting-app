@@ -324,10 +324,13 @@ class UserController extends AbstractController
                         $index = 0;
                         foreach ($userAttributes as $key=>$value)
                         {
-                            if($index == 0) $error = $error."Pas de données pour : ";
-                            if(empty($data[0][$key])) $error = $error.$key.", ";
+                            if(empty($data[0][$key]))
+                            {
+                                if($index == 0) $error = $error."Pas de données pour : ";
+                                $error = $error.$key.", ";
+                                if($index == count($userAttributes)) $error=substr_replace($error, '. ', strlen($error)-2, 2 );
+                            }
                             $index++;
-                            if($index == count($userAttributes)) $error=substr_replace($error, '. ', strlen($error)-2, 2 );
                         }
 
                         if($error == null)
