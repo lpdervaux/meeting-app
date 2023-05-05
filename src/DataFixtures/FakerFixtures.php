@@ -33,15 +33,21 @@ abstract class FakerFixtures extends Fixture
 
     abstract protected function generate () : mixed;
 
-    protected function fakeMany (int $count, ?string $prefix = null, ?callable $entityGenerator = null) : void
+    protected function fakeMany (
+        int $count,
+        ?string $prefix = null,
+        ?callable $entityGenerator = null,
+        bool $forget = false
+    ) : void
     {
         for ($i = 0; $i < $count; $i++) {
             $entity = ( $entityGenerator ) ? $entityGenerator() : $this->generate();
             $this->manager->persist($entity);
-            $this->addReference(
-                ( $prefix ) ? $prefix . $i : $this::class . $i,
-                $entity
-            );
+            if ( ! $forget )
+                $this->addReference(
+                    ( $prefix ) ? $prefix . $i : $this::class . $i,
+                    $entity
+                );
         }
     }
 }

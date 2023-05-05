@@ -21,24 +21,6 @@ class MeetupFixtures
 {
     public const COUNT = 100;
 
-    public const SCHEDULED_COUNT = 5;
-    public const SCHEDULED_PREFIX = __CLASS__ . 'scheduled';
-    public const OPEN_COUNT = 5;
-    public const OPEN_PREFIX = __CLASS__ . 'open';
-    public const CLOSED_COUNT = 5;
-    public const CLOSED_PREFIX = __CLASS__ . 'closed';
-    public const ONGOING_COUNT = 5;
-    public const ONGOING_PREFIX = __CLASS__ . 'ongoing';
-    public const CONCLUDED_COUNT = 5;
-    public const CONCLUDED_PREFIX = __CLASS__ . 'concluded';
-
-    public const OPEN_FULL_COUNT = 3;
-    public const OPEN_FULL_PREFIX = __CLASS__ . 'openFull';
-    public const OPEN_CANCELLED_COUNT = 3;
-    public const OPEN_CANCELLED_PREFIX = __CLASS__ . 'openCancelled';
-    public const CLOSED_CANCELLED_COUNT = 3;
-    public const CLOSED_CANCELLED_PREFIX = __CLASS__ . 'closedCancelled';
-
     public function __construct (
         FakerService $fakerService,
         private readonly MeetupScheduleGeneratorService $scheduleGenerator
@@ -61,51 +43,63 @@ class MeetupFixtures
 
         $now = new \DateTimeImmutable();
 
+        $this->fakeSample($now);
+
+        $this->fakeMany(self::COUNT);
+
+        $manager->flush();
+    }
+
+    private function fakeSample (\DateTimeImmutable $now) : void
+    {
         $this->fakeMany(
-            self::SCHEDULED_COUNT,
-            self::SCHEDULED_PREFIX,
-            fn () : Meetup => $this->generateStatus(MeetupStatus::Scheduled, $now)
+            5,
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Scheduled, $now),
+            forget: true
         );
 
         $this->fakeMany(
-            self::OPEN_COUNT,
-            self::OPEN_PREFIX,
-            fn () : Meetup => $this->generateStatus(MeetupStatus::Open, $now)
+            5,
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Open, $now),
+            forget: true
         );
 
         $this->fakeMany(
-            self::CLOSED_COUNT,
-            self::CLOSED_PREFIX,
-            fn () : Meetup => $this->generateStatus(MeetupStatus::Closed, $now)
+            5,
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Closed, $now),
+            forget: true
         );
 
         $this->fakeMany(
-            self::ONGOING_COUNT,
-            self::ONGOING_PREFIX,
-            fn () : Meetup => $this->generateStatus(MeetupStatus::Ongoing, $now)
+            5,
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Ongoing, $now),
+            forget: true
         );
 
         $this->fakeMany(
-            self::CONCLUDED_COUNT,
-            self::CONCLUDED_PREFIX,
-            fn () : Meetup => $this->generateStatus(MeetupStatus::Concluded, $now)
+            5,
+            entityGenerator: fn () : Meetup => $this->generateStatus(MeetupStatus::Concluded, $now),
+            forget: true
         );
 
+        // open and full
         $this->fakeMany(
-            self::OPEN_FULL_COUNT,
-            self::OPEN_FULL_PREFIX,
+            5,
+            entityGenerator:
             fn () : Meetup =>
-                $this->generateStatus(
-                    MeetupStatus::Open,
-                    $now,
-                    capacity: 10,
-                    attendeeCount: 10
-                )
+            $this->generateStatus(
+                MeetupStatus::Open,
+                $now,
+                capacity: 10,
+                attendeeCount: 10
+            ),
+            forget: true
         );
 
+        // cancelled and open
         $this->fakeMany(
-            self::OPEN_CANCELLED_COUNT,
-            self::OPEN_CANCELLED_PREFIX,
+            5,
+            entityGenerator:
             function () use ($now) : Meetup
             {
                 $meetup = $this->generateStatus(
@@ -121,12 +115,14 @@ class MeetupFixtures
                 );
 
                 return $meetup;
-            }
+            },
+            forget: true
         );
 
+        // cancelled and closed
         $this->fakeMany(
-            self::CLOSED_CANCELLED_COUNT,
-            self::CLOSED_CANCELLED_PREFIX,
+            5,
+            entityGenerator:
             function () use ($now) : Meetup
             {
                 $meetup = $this->generateStatus(
@@ -142,12 +138,9 @@ class MeetupFixtures
                 );
 
                 return $meetup;
-            }
+            },
+            forget: true
         );
-
-        $this->fakeMany(self::COUNT);
-
-        $manager->flush();
     }
 
     protected function generate (
@@ -243,45 +236,45 @@ class MeetupFixtures
 
     private function generateStatus (
         MeetupStatus $status,
-        ?\DateTimeImmutable $at = null,
+        ?\DateTimeImmutable $on = null,
         mixed ...$options
     ) : Meetup
     {
-        $at ??= new \DateTimeImmutable();
+        $on ??= new \DateTimeImmutable();
 
         switch ( $status )
         {
             case MeetupStatus::Scheduled:
                 $registrationStart = $this->dateTimeImmutableBetween(
-                    $at->modify('+7 days'),
-                    $at->modify('+14 days')
+                    $on->modify('+7 days'),
+                    $on->modify('+14 days')
                 );
                 break;
             case MeetupStatus::Open:
                 $registrationStart = $this->dateTimeImmutableBetween(
-                    $at->modify('-8 days'),
-                    $at->modify('-1 day')
+                    $on->modify('-8 days'),
+                    $on->modify('-1 day')
                 );
                 break;
             case MeetupStatus::Closed:
                 $registrationEnd = $this->dateTimeImmutableBetween(
-                    $at->modify('-8 days'),
-                    $at->modify('-1 day')
+                    $on->modify('-8 days'),
+                    $on->modify('-1 day')
                 );
                 $registrationStart = $this->scheduleGenerator->registrationStartFromRegistrationEnd($registrationEnd);
                 break;
             case MeetupStatus::Ongoing:
                 $start = $this->dateTimeImmutableBetween(
-                    $at->modify('-30 minutes'),
-                    $at
+                    $on->modify('-30 minutes'),
+                    $on
                 );
                 $registrationEnd = $this->scheduleGenerator->registrationEndFromStart($start);
                 $registrationStart = $this->scheduleGenerator->registrationStartFromRegistrationEnd($registrationEnd);
                 break;
             case MeetupStatus::Concluded:
                 $end = $this->dateTimeImmutableBetween(
-                    $at->modify('-8 days'),
-                    $at->modify('-1 day')
+                    $on->modify('-8 days'),
+                    $on->modify('-1 day')
                 );
                 $start = $this->scheduleGenerator->startFromEnd($end);
                 $registrationEnd = $this->scheduleGenerator->registrationEndFromStart($start);
@@ -293,7 +286,7 @@ class MeetupFixtures
 
         return $this->generate(
             ...[
-                'now' => $at,
+                'now' => $on,
 
                 'registrationStart' => $registrationStart,
                 'registrationEnd' => $registrationEnd ?? null,
