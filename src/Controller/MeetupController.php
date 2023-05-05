@@ -111,7 +111,7 @@ class MeetupController extends AbstractController
                 'choice_attr' => [
                     $session->get('filters') == null ?
                         $campusRepository->findByName(DEFAULT_CAMPUS)['no'] :
-                        $campusRepository->findByName($session->get('filters')['campus']->getName())['no']
+                        $campusRepository->findByName($session->get('filters')['campus']->getName())['no'] ?? null
                     => ['selected' => true]
                 ]
             ])
